@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisPorta - Gestor</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f97316">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SisPorta Gestor">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Biblioteca de Compartilhamento -->
+    <script src="compartilhamento.js"></script>
+    
+    <style>
+        :root {
+            --color-vibrant-orange: #f97316;
+            --color-vibrant-cyan: #06b6d4;
+            --color-vibrant-purple: #8b5cf6;
+            --color-dark-bg: #0f172a;
+            --color-dark-card: #1e293b;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-dark-bg);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .abstract-blob-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 400px;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .abstract-blob-bg::before,
+        .abstract-blob-bg::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.5;
+            filter: blur(70px);
+        }
+
+        .abstract-blob-bg::before {
+            width: 450px;
+            height: 450px;
+            top: -120px;
+            left: -100px;
+            background: radial-gradient(circle, var(--color-vibrant-orange) 0%, var(--color-vibrant-purple) 70%);
+            animation: pulse-blob 9s infinite alternate;
+        }
+
+        .abstract-blob-bg::after {
+            width: 380px;
+            height: 380px;
+            top: 40px;
+            right: -80px;
+            background: radial-gradient(circle, var(--color-vibrant-cyan) 0%, var(--color-dark-bg) 70%);
+            animation: pulse-blob 11s infinite reverse;
+        }
+
+        @keyframes pulse-blob {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.08) translate(4%, 4%); }
+            100% { transform: scale(1) translate(0, 0); }
+        }
+
+        .card-neobrutal {
+            background-color: var(--color-dark-card);
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .nav-btn {
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-btn.active {
+            border-bottom-color: var(--color-vibrant-cyan);
+            color: var(--color-vibrant-cyan);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .territorio-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .territorio-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-aguardando {
+            background-color: rgba(234, 179, 8, 0.2);
+            color: #facc15;
+        }
+
+        .badge-andamento {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .badge-concluido {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .badge-parcial {
+            background-color: rgba(251, 146, 60, 0.2);
+            color: #fb923c;
+        }
+
+        .input-neobrutal {
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .input-neobrutal:focus {
+            outline: none;
+            border-color: var(--color-vibrant-cyan);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Abstrato -->
+    <div class="abstract-blob-bg"></div>
+
+    <!-- Container Principal -->
+    <div class="container mx-auto px-4 py-6 max-w-7xl relative z-10">
+        
+        <!-- Header -->
+        <div class="mb-6">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1 class="text-4xl font-bold text-white flex items-center gap-2">
+                        <span class="text-5xl">👥</span> SisPorta
+                    </h1>
+                    <p class="text-gray-400 text-sm">Gestor</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="abrirModalConfiguracoes()" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegação -->
+        <div class="card-neobrutal p-4 mb-6">
+            <div class="flex gap-4 overflow-x-auto">
+                <button onclick="navegarPara('dashboard')" class="nav-btn px-4 py-2 text-white font-semibold active">
+                    📊 Dashboard
+                </button>
+                <button onclick="navegarPara('territorios')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
+                    📍 Territórios
+                </button>
+                <button onclick="navegarPara('colaboradores')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
+                    👥 Colaboradores
+                </button>
+                <button onclick="navegarPara('devolucoes')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
+                    📥 Devoluções
+                </button>
+            </div>
+        </div>
+
+        <!-- Seção: Dashboard -->
+        <section id="secao-dashboard" class="fade-in">
+            <!-- Estatísticas Gerais -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <div class="text-3xl font-bold text-orange-400" id="dashTotalTerritorios">0</div>
+                    <div class="text-sm text-gray-400">Total de Territórios</div>
+                </div>
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <div class="text-3xl font-bold text-yellow-400" id="dashAguardando">0</div>
+                    <div class="text-sm text-gray-400">Aguardando Designação</div>
+                </div>
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <div class="text-3xl font-bold text-blue-400" id="dashEmAndamento">0</div>
+                    <div class="text-sm text-gray-400">Em Andamento</div>
+                </div>
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <div class="text-3xl font-bold text-green-400" id="dashConcluidos">0</div>
+                    <div class="text-sm text-gray-400">Concluídos</div>
+                </div>
+            </div>
+
+            <!-- Progresso Geral -->
+            <div class="card-neobrutal p-6 mb-6">
+                <h2 class="text-xl font-bold text-white mb-4">📈 Progresso Geral</h2>
+                <div class="mb-2">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-400">Residências Visitadas</span>
+                        <span class="text-white font-semibold"><span id="dashVisitadas">0</span> / <span id="dashTotalResidencias">0</span></span>
+                    </div>
+                    <div class="bg-gray-700 rounded-full h-3">
+                        <div id="dashProgressBar" class="h-3 rounded-full bg-gradient-to-r from-orange-500 to-purple-500" style="width: 0%"></div>
+                    </div>
+                </div>
+                <p class="text-center text-sm text-gray-400 mt-2">
+                    <span id="dashPercentual">0</span>% Concluído
+                </p>
+            </div>
+
+            <!-- Atividades Recentes -->
+            <div class="card-neobrutal p-6">
+                <h2 class="text-xl font-bold text-white mb-4">🕒 Atividades Recentes</h2>
+                <div id="atividadesRecentes" class="space-y-3">
+                    <div class="text-center py-8 text-gray-400">
+                        <div class="text-4xl mb-2">📋</div>
+                        Nenhuma atividade recente
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Territórios -->
+        <section id="secao-territorios" class="hidden fade-in">
+            <div class="card-neobrutal p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-white">📍 Gerenciar Territórios</h2>
+                    <label class="btn-primary bg-gradient-to-r from-orange-500 to-purple-600 text-white cursor-pointer flex items-center gap-2">
+                        <i data-lucide="upload" class="w-5 h-5"></i>
+                        Importar do Supervisor
+                        <input type="file" id="importarTerritorioSupervisor" accept=".json" style="display: none;" onchange="importarDoSupervisor(event)">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Lista de Territórios -->
+            <div id="listaTerritorios" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Territórios serão inseridos aqui -->
+            </div>
+        </section>
+
+        <!-- Seção: Colaboradores -->
+        <section id="secao-colaboradores" class="hidden fade-in">
+            <div class="card-neobrutal p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-white">👥 Gerenciar Colaboradores</h2>
+                    <button onclick="abrirModalNovoColaborador()" class="btn-primary bg-gradient-to-r from-cyan-500 to-blue-600 text-white flex items-center gap-2">
+                        <i data-lucide="user-plus" class="w-5 h-5"></i>
+                        Adicionar Colaborador
+                    </button>
+                </div>
+
+                <div id="listaColaboradores" class="space-y-3">
+                    <!-- Colaboradores serão inseridos aqui -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Devoluções -->
+        <section id="secao-devolucoes" class="hidden fade-in">
+            <div class="card-neobrutal p-6 mb-6">
+                <h2 class="text-2xl font-bold text-white mb-4">📥 Importar Devoluções de Colaboradors</h2>
+                <p class="text-gray-400 mb-4">Importe os territórios devolvidos pelos colaboradors de campo.</p>
+                
+                <label class="btn-primary bg-gradient-to-r from-green-500 to-emerald-600 text-white cursor-pointer inline-flex items-center gap-2">
+                    <i data-lucide="upload" class="w-5 h-5"></i>
+                    Importar Devolução
+                    <input type="file" id="importarDevolucao" accept=".json" style="display: none;" onchange="importarDevolucao(event)">
+                </label>
+            </div>
+
+            <!-- Histórico de Devoluções -->
+            <div class="card-neobrutal p-6">
+                <h3 class="text-xl font-bold text-white mb-4">📜 Histórico de Devoluções</h3>
+                <div id="historicoDevolucoes" class="space-y-3">
+                    <div class="text-center py-8 text-gray-400">
+                        <div class="text-4xl mb-2">📋</div>
+                        Nenhuma devolução registrada
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal: Detalhes do Território -->
+        <div id="modalTerritorio" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalTerritorio')">
+            <div class="card-neobrutal w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                <h3 class="text-2xl font-bold text-white mb-4" id="modalTerritorioNome">-</h3>
+                
+                <div class="space-y-4">
+                    <!-- Informações -->
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-400">Território ID:</span>
+                            <span class="text-white font-semibold ml-2" id="modalTerritorioID">-</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Status:</span>
+                            <span class="ml-2" id="modalTerritorioStatus">-</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Total Residências:</span>
+                            <span class="text-white font-semibold ml-2" id="modalTerritorioTotal">-</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Visitadas:</span>
+                            <span class="text-white font-semibold ml-2" id="modalTerritorioVisitadas">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Designar Colaborador -->
+                    <div class="p-4 bg-blue-900/20 border border-blue-600 rounded-lg">
+                        <h4 class="text-white font-semibold mb-3">👤 Designar para Colaborador</h4>
+                        <select id="modalColaboradorSelect" class="input-neobrutal mb-3">
+                            <option value="">Selecione um colaborador...</option>
+                        </select>
+                        <button onclick="designarTerritorio()" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white w-full">
+                            Designar e Exportar
+                        </button>
+                    </div>
+
+                    <!-- Ações -->
+                    <div class="flex gap-3">
+                        <button onclick="exportarTerritorioSupervisor()" class="btn-primary bg-orange-600 hover:bg-orange-700 text-white flex-1">
+                            📤 Exportar para Supervisor
+                        </button>
+                        <button onclick="excluirTerritorio()" class="btn-primary bg-red-600 hover:bg-red-700 text-white flex-1">
+                            🗑️ Excluir
+                        </button>
+                    </div>
+
+                    <button onclick="fecharModal('modalTerritorio')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white w-full">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Novo Colaborador -->
+        <div id="modalNovoColaborador" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalNovoColaborador')">
+            <div class="card-neobrutal w-full max-w-md p-6" onclick="event.stopPropagation()">
+                <h3 class="text-2xl font-bold text-white mb-4">👤 Adicionar Colaborador</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Colaborador</label>
+                        <input type="text" id="novoColaboradorNome" class="input-neobrutal" placeholder="Ex: Maria Silva">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Telefone (Opcional)</label>
+                        <input type="text" id="novoColaboradorTelefone" class="input-neobrutal" placeholder="Ex: (11) 98765-4321">
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="salvarNovoColaborador()" class="btn-primary bg-green-600 hover:bg-green-700 text-white flex-1">
+                            Salvar
+                        </button>
+                        <button onclick="fecharModal('modalNovoColaborador')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Configurações -->
+        <div id="modalConfiguracoes" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalConfiguracoes')">
+            <div class="card-neobrutal w-full max-w-md p-6" onclick="event.stopPropagation()">
+                <h3 class="text-2xl font-bold text-white mb-4">⚙️ Configurações</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome da Unidade</label>
+                        <input type="text" id="configUnidade" class="input-neobrutal" placeholder="Ex: Unidade Central">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Gestor</label>
+                        <input type="text" id="configGestor" class="input-neobrutal" placeholder="Ex: João Silva">
+                    </div>
+
+                    <div class="p-4 bg-red-900/20 border border-red-600 rounded-lg">
+                        <h4 class="text-white font-semibold mb-2">⚠️ Zona de Perigo</h4>
+                        <button onclick="limparTodosDados()" class="btn-primary bg-red-600 hover:bg-red-700 text-white w-full">
+                            🗑️ Limpar Todos os Dados
+                        </button>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="salvarConfiguracoes()" class="btn-primary bg-green-600 hover:bg-green-700 text-white flex-1">
+                            Salvar
+                        </button>
+                        <button onclick="fecharModal('modalConfiguracoes')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Variáveis Globais
+        let territorios = [];
+        let colaboradors = [];
+        let devolucoes = [];
+        let config = {
+            ubs: '',
+            gestor: ''
+        };
+        let territorioAtual = null;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', async function() {
+            lucide.createIcons();
+            
+            // Registrar Service Worker (PWA)
+            if ('serviceWorker' in navigator) {
+                try {
+                    await navigator.serviceWorker.register('service-worker.js');
+                    console.log('Service Worker registrado');
+                } catch (erro) {
+                    console.log('Service Worker falhou:', erro);
+                }
+            }
+            
+            carregarDados();
+            atualizarTodasInterfaces();
+        });
+
+        // === GESTÃO DE DADOS ===
+        function carregarDados() {
+            const territoriosSalvos = localStorage.getItem('sisPorta_coord_territorios');
+            const colaboradorsSalvos = localStorage.getItem('sisPorta_coord_colaboradors');
+            const devolicoesSalvas = localStorage.getItem('sisPorta_coord_devolucoes');
+            const configSalva = localStorage.getItem('sisPorta_coord_config');
+
+            if (territoriosSalvos) territorios = JSON.parse(territoriosSalvos);
+            if (colaboradorsSalvos) colaboradors = JSON.parse(colaboradorsSalvos);
+            if (devolicoesSalvas) devolucoes = JSON.parse(devolicoesSalvas);
+            if (configSalva) config = JSON.parse(configSalva);
+        }
+
+        function salvarDados() {
+            localStorage.setItem('sisPorta_coord_territorios', JSON.stringify(territorios));
+            localStorage.setItem('sisPorta_coord_colaboradors', JSON.stringify(colaboradors));
+            localStorage.setItem('sisPorta_coord_devolucoes', JSON.stringify(devolucoes));
+            localStorage.setItem('sisPorta_coord_config', JSON.stringify(config));
+        }
+
+        // === NAVEGAÇÃO ===
+        function navegarPara(secao) {
+            // Esconder todas as seções
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            
+            // Mostrar seção selecionada
+            document.getElementById('secao-' + secao).classList.remove('hidden');
+
+            // Atualizar botões de navegação
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-gray-400');
+                btn.classList.remove('text-white');
+            });
+
+            event.target.classList.add('active');
+            event.target.classList.remove('text-gray-400');
+            event.target.classList.add('text-white');
+
+            // Atualizar interface da seção
+            if (secao === 'dashboard') atualizarDashboard();
+            if (secao === 'territorios') atualizarListaTerritorios();
+            if (secao === 'colaboradors') atualizarListaColaboradors();
+            if (secao === 'devolucoes') atualizarHistoricoDevolucoes();
+
+            lucide.createIcons();
+        }
+
+        function atualizarTodasInterfaces() {
+            atualizarDashboard();
+            atualizarListaTerritorios();
+            atualizarListaColaboradors();
+            atualizarHistoricoDevolucoes();
+            lucide.createIcons();
+        }
+
+        // === DASHBOARD ===
+        function atualizarDashboard() {
+            const totalTerritorios = territorios.length;
+            const aguardando = territorios.filter(t => t.status === 'aguardando_designacao').length;
+            const emAndamento = territorios.filter(t => t.status === 'em_andamento').length;
+            const concluidos = territorios.filter(t => t.status === 'concluido' || t.status === 'parcialmente_concluido').length;
+
+            document.getElementById('dashTotalTerritorios').textContent = totalTerritorios;
+            document.getElementById('dashAguardando').textContent = aguardando;
+            document.getElementById('dashEmAndamento').textContent = emAndamento;
+            document.getElementById('dashConcluidos').textContent = concluidos;
+
+            // Progresso geral
+            let totalResidencias = 0;
+            let visitadas = 0;
+
+            territorios.forEach(t => {
+                totalResidencias += t.estatisticas.total_residencias;
+                visitadas += t.estatisticas.visitadas;
+            });
+
+            const percentual = totalResidencias > 0 ? (visitadas / totalResidencias) * 100 : 0;
+
+            document.getElementById('dashTotalResidencias').textContent = totalResidencias;
+            document.getElementById('dashVisitadas').textContent = visitadas;
+            document.getElementById('dashProgressBar').style.width = percentual + '%';
+            document.getElementById('dashPercentual').textContent = percentual.toFixed(1);
+
+            // Atividades recentes
+            atualizarAtividadesRecentes();
+        }
+
+        function atualizarAtividadesRecentes() {
+            const container = document.getElementById('atividadesRecentes');
+            
+            if (devolucoes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <div class="text-4xl mb-2">📋</div>
+                        Nenhuma atividade recente
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            devolucoes.slice(-5).reverse().forEach(dev => {
+                html += `
+                    <div class="p-4 bg-slate-700/50 rounded-lg">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-white font-semibold">${dev.territorio_nome}</div>
+                                <div class="text-sm text-gray-400">Colaborador: ${dev.colaborador}</div>
+                            </div>
+                            <span class="badge ${getBadgeClass(dev.status)}">${getStatusText(dev.status)}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-2">${formatarData(dev.data_devolucao)}</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // === TERRITÓRIOS ===
+        function importarDoSupervisor(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const dados = JSON.parse(e.target.result);
+                    
+                    if (dados.tipo !== 'territorio') {
+                        alert('❌ Arquivo inválido! Selecione um arquivo de território.');
+                        return;
+                    }
+
+                    // Verificar se já existe
+                    const existe = territorios.find(t => t.territorio_id === dados.territorio_id);
+                    if (existe) {
+                        if (!confirm(`Território "${dados.nome}" já existe. Deseja substituir?`)) return;
+                        territorios = territorios.filter(t => t.territorio_id !== dados.territorio_id);
+                    }
+
+                    dados.status = 'aguardando_designacao';
+                    dados.ubs = config.ubs || dados.ubs;
+                    territorios.push(dados);
+                    
+                    salvarDados();
+                    atualizarTodasInterfaces();
+                    alert('✅ Território importado com sucesso!');
+                } catch (error) {
+                    alert('❌ Erro ao ler arquivo: ' + error.message);
+                }
+            };
+            reader.readAsText(arquivo);
+            event.target.value = '';
+        }
+
+        function atualizarListaTerritorios() {
+            const container = document.getElementById('listaTerritorios');
+            
+            if (territorios.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full card-neobrutal p-8 text-center">
+                        <div class="text-6xl mb-4">📍</div>
+                        <h3 class="text-xl font-bold text-white mb-2">Nenhum Território</h3>
+                        <p class="text-gray-400">Importe territórios do supervisor para começar.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            territorios.forEach(t => {
+                html += `
+                    <div class="territorio-card card-neobrutal p-6" onclick="abrirModalTerritorio('${t.territorio_id}')">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-lg font-bold text-white">${t.nome}</h3>
+                            <span class="badge ${getBadgeClass(t.status)}">${getStatusText(t.status)}</span>
+                        </div>
+                        
+                        <div class="text-sm text-gray-400 mb-3">
+                            <div>ID: ${t.territorio_id}</div>
+                            ${t.colaborador ? `<div>Colaborador: ${t.colaborador}</div>` : ''}
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div>
+                                <div class="text-white font-bold">${t.estatisticas.total_residencias}</div>
+                                <div class="text-gray-400">Total</div>
+                            </div>
+                            <div>
+                                <div class="text-green-400 font-bold">${t.estatisticas.visitadas}</div>
+                                <div class="text-gray-400">Visitadas</div>
+                            </div>
+                            <div>
+                                <div class="text-yellow-400 font-bold">${t.estatisticas.pendentes}</div>
+                                <div class="text-gray-400">Pendentes</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 bg-gray-700 rounded-full h-2">
+                            <div class="h-2 rounded-full bg-gradient-to-r from-green-500 to-blue-500" style="width: ${t.estatisticas.percentual_conclusao}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function abrirModalTerritorio(territorioId) {
+            const territorio = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorio) return;
+
+            territorioAtual = territorio;
+
+            document.getElementById('modalTerritorioNome').textContent = territorio.nome;
+            document.getElementById('modalTerritorioID').textContent = territorio.territorio_id;
+            document.getElementById('modalTerritorioStatus').innerHTML = `<span class="badge ${getBadgeClass(territorio.status)}">${getStatusText(territorio.status)}</span>`;
+            document.getElementById('modalTerritorioTotal').textContent = territorio.estatisticas.total_residencias;
+            document.getElementById('modalTerritorioVisitadas').textContent = territorio.estatisticas.visitadas;
+
+            // Preencher select de colaboradors
+            const select = document.getElementById('modalColaboradorSelect');
+            select.innerHTML = '<option value="">Selecione um colaborador...</option>';
+            colaboradors.forEach(a => {
+                select.innerHTML += `<option value="${a.nome}">${a.nome}</option>`;
+            });
+
+            document.getElementById('modalTerritorio').classList.remove('hidden');
+        }
+
+        async function designarTerritorio() {
+            if (!territorioAtual) return;
+
+            const colaboradorNome = document.getElementById('modalColaboradorSelect').value;
+            if (!colaboradorNome) {
+                alert('⚠️ Selecione um colaborador!');
+                return;
+            }
+
+            territorioAtual.colaborador = colaboradorNome;
+            territorioAtual.status = 'em_andamento';
+            territorioAtual.gestor = config.gestor;
+            territorioAtual.ubs = config.ubs;
+
+            salvarDados();
+            
+            // Usar compartilhamento híbrido
+            if (window.SisPortaShare) {
+                await compartilharTerritorioColaborador(territorioAtual, colaboradorNome);
+            } else {
+                // Fallback: exportar arquivo tradicional
+                exportarArquivoTradicional(territorioAtual, colaboradorNome);
+            }
+            
+            fecharModal('modalTerritorio');
+            atualizarTodasInterfaces();
+        }
+
+        async function compartilharTerritorioColaborador(territorio, colaboradorNome) {
+            const resultado = await SisPortaShare.compartilhar(territorio, 'colaborador');
+            
+            if (!resultado.sucesso) {
+                alert('❌ Erro ao compartilhar: ' + resultado.erro);
+                return;
+            }
+
+            // Método usado: Gist
+            if (resultado.metodo === 'gist') {
+                const link = resultado.dados.link;
+                
+                // Tentar Share API nativo
+                const compartilhado = await SisPortaShare.compartilharNativo(
+                    'SisPorta - Território',
+                    `Território: ${territorio.nome}\nColaborador: ${colaboradorNome}`,
+                    link
+                );
+
+                if (!compartilhado) {
+                    // Copiar link e mostrar
+                    await SisPortaShare.copiarParaClipboard(link);
+                    alert(
+                        `✅ Link copiado!\n\n` +
+                        `📋 Cole no WhatsApp e envie para ${colaboradorNome}\n\n` +
+                        `Link: ${link}`
+                    );
+                } else {
+                    alert(`✅ Território compartilhado via link para ${colaboradorNome}!`);
+                }
+            }
+            
+            // Método usado: QR Code
+            else if (resultado.metodo === 'qrcode') {
+                mostrarModalQRCode(resultado.dados, colaboradorNome);
+            }
+            
+            // Método usado: Arquivo
+            else if (resultado.metodo === 'arquivo') {
+                const link = document.createElement('a');
+                link.href = resultado.dados.url;
+                link.download = resultado.dados.nome;
+                link.click();
+                URL.revokeObjectURL(resultado.dados.url);
+                alert(`✅ Arquivo baixado! Envie para ${colaboradorNome} via WhatsApp.`);
+            }
+        }
+
+        function exportarArquivoTradicional(territorio, colaboradorNome) {
+            const dataStr = JSON.stringify(territorio, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = `territorio_${territorio.territorio_id}_${colaboradorNome.replace(/\s+/g, '_')}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert(`✅ Território designado para ${colaboradorNome}!`);
+        }
+
+        function mostrarModalQRCode(dados, colaboradorNome) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="card-neobrutal w-full max-w-md p-6 text-center" onclick="event.stopPropagation()">
+                    <h3 class="text-2xl font-bold text-white mb-4">📱 Compartilhar via QR Code</h3>
+                    <p class="text-gray-400 mb-4">Colaborador: ${colaboradorNome}</p>
+                    
+                    <div class="bg-white p-4 rounded-lg mb-4 inline-block">
+                        ${dados.qrCodeSVG}
+                    </div>
+                    
+                    <p class="text-sm text-gray-400 mb-4">
+                        ${colaboradorNome} deve escanear este QR Code com a câmera do celular
+                    </p>
+                    
+                    <div class="p-3 bg-blue-900/20 border border-blue-600 rounded-lg mb-4">
+                        <p class="text-xs text-blue-300 mb-2">Ou envie este link:</p>
+                        <p class="text-white font-mono text-xs break-all">${dados.link}</p>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="SisPortaShare.copiarParaClipboard('${dados.link}').then(() => alert('Link copiado!'))" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white flex-1">
+                            📋 Copiar Link
+                        </button>
+                        <button onclick="this.closest('.fixed').remove()" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            `;
+            modal.onclick = () => modal.remove();
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        function exportarTerritorioSupervisor() {
+            if (!territorioAtual) return;
+
+            const confirmMsg = `📤 Exportar território para o Supervisor?\n\n` +
+                               `Território: ${territorioAtual.nome}\n` +
+                               `Status: ${getStatusText(territorioAtual.status)}\n\n` +
+                               `⚠️ Após exportar, o território será removido da sua lista.`;
+
+            if (!confirm(confirmMsg)) return;
+
+            const dataStr = JSON.stringify(territorioAtual, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const dataAtual = new Date().toISOString().split('T')[0];
+            link.href = url;
+            link.download = `territorio_${territorioAtual.territorio_id}_supervisor_${dataAtual}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            
+            // Remover território da lista após exportar
+            const territorioId = territorioAtual.territorio_id;
+            territorios = territorios.filter(t => t.territorio_id !== territorioId);
+            salvarDados();
+            
+            fecharModal('modalTerritorio');
+            atualizarTodasInterfaces();
+            
+            alert('✅ Território exportado para supervisor e removido da sua lista!');
+        }
+
+        function excluirTerritorio() {
+            if (!territorioAtual) return;
+
+            if (confirm(`⚠️ Tem certeza que deseja excluir o território "${territorioAtual.nome}"?`)) {
+                territorios = territorios.filter(t => t.territorio_id !== territorioAtual.territorio_id);
+                salvarDados();
+                fecharModal('modalTerritorio');
+                atualizarTodasInterfaces();
+                alert('✅ Território excluído!');
+            }
+        }
+
+        // === COLABORADORS ===
+        function atualizarListaColaboradors() {
+            const container = document.getElementById('listaColaboradors');
+            
+            if (colaboradors.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <div class="text-4xl mb-2">👥</div>
+                        Nenhum colaborador cadastrado
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            colaboradors.forEach(a => {
+                const territoriosAtivos = territorios.filter(t => t.colaborador === a.nome && t.status === 'em_andamento').length;
+                
+                html += `
+                    <div class="p-4 bg-slate-700/50 rounded-lg flex justify-between items-center">
+                        <div>
+                            <div class="text-white font-semibold">${a.nome}</div>
+                            ${a.telefone ? `<div class="text-sm text-gray-400">${a.telefone}</div>` : ''}
+                            <div class="text-xs text-gray-500 mt-1">${territoriosAtivos} território(s) ativo(s)</div>
+                        </div>
+                        <button onclick="excluirColaborador('${a.nome}')" class="btn-primary bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function abrirModalNovoColaborador() {
+            document.getElementById('novoColaboradorNome').value = '';
+            document.getElementById('novoColaboradorTelefone').value = '';
+            document.getElementById('modalNovoColaborador').classList.remove('hidden');
+        }
+
+        function salvarNovoColaborador() {
+            const nome = document.getElementById('novoColaboradorNome').value.trim();
+            const telefone = document.getElementById('novoColaboradorTelefone').value.trim();
+
+            if (!nome) {
+                alert('⚠️ Informe o nome do colaborador!');
+                return;
+            }
+
+            const existe = colaboradors.find(a => a.nome === nome);
+            if (existe) {
+                alert('⚠️ Já existe um colaborador com este nome!');
+                return;
+            }
+
+            colaboradors.push({ nome, telefone });
+            salvarDados();
+            fecharModal('modalNovoColaborador');
+            atualizarListaColaboradors();
+            alert('✅ Colaborador adicionado com sucesso!');
+        }
+
+        function excluirColaborador(nome) {
+            if (confirm(`⚠️ Tem certeza que deseja excluir o colaborador "${nome}"?`)) {
+                colaboradors = colaboradors.filter(a => a.nome !== nome);
+                salvarDados();
+                atualizarListaColaboradors();
+                alert('✅ Colaborador excluído!');
+            }
+        }
+
+        // === DEVOLUÇÕES ===
+        function importarDevolucao(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const dados = JSON.parse(e.target.result);
+                    
+                    if (dados.tipo !== 'territorio') {
+                        alert('❌ Arquivo inválido!');
+                        return;
+                    }
+
+                    // Atualizar território na lista
+                    const index = territorios.findIndex(t => t.territorio_id === dados.territorio_id);
+                    if (index !== -1) {
+                        territorios[index] = dados;
+                    } else {
+                        territorios.push(dados);
+                    }
+
+                    // Registrar devolução
+                    devolucoes.push({
+                        territorio_id: dados.territorio_id,
+                        territorio_nome: dados.nome,
+                        colaborador: dados.colaborador,
+                        status: dados.status,
+                        data_devolucao: new Date().toISOString(),
+                        percentual_conclusao: dados.estatisticas.percentual_conclusao
+                    });
+
+                    salvarDados();
+                    atualizarTodasInterfaces();
+                    alert('✅ Devolução importada com sucesso!');
+                } catch (error) {
+                    alert('❌ Erro ao ler arquivo: ' + error.message);
+                }
+            };
+            reader.readAsText(arquivo);
+            event.target.value = '';
+        }
+
+        function atualizarHistoricoDevolucoes() {
+            const container = document.getElementById('historicoDevolucoes');
+            
+            if (devolucoes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <div class="text-4xl mb-2">📋</div>
+                        Nenhuma devolução registrada
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            devolucoes.slice().reverse().forEach(dev => {
+                html += `
+                    <div class="p-4 bg-slate-700/50 rounded-lg">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <div class="text-white font-semibold">${dev.territorio_nome}</div>
+                                <div class="text-sm text-gray-400">ID: ${dev.territorio_id}</div>
+                                <div class="text-sm text-gray-400">Colaborador: ${dev.colaborador}</div>
+                            </div>
+                            <span class="badge ${getBadgeClass(dev.status)}">${getStatusText(dev.status)}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400">${formatarData(dev.data_devolucao)}</span>
+                            <span class="text-white font-semibold">${dev.percentual_conclusao.toFixed(1)}% concluído</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // === CONFIGURAÇÕES ===
+        function abrirModalConfiguracoes() {
+            document.getElementById('configUnidade').value = config.ubs || '';
+            document.getElementById('configGestor').value = config.gestor || '';
+            document.getElementById('modalConfiguracoes').classList.remove('hidden');
+        }
+
+        function salvarConfiguracoes() {
+            config.ubs = document.getElementById('configUnidade').value.trim();
+            config.gestor = document.getElementById('configGestor').value.trim();
+            
+            salvarDados();
+            fecharModal('modalConfiguracoes');
+            alert('✅ Configurações salvas!');
+        }
+
+        function limparTodosDados() {
+            if (confirm('⚠️ ATENÇÃO! Esta ação irá excluir TODOS os dados (territórios, colaboradors, devoluções e configurações).\n\nDeseja continuar?')) {
+                if (confirm('⚠️ Tem CERTEZA ABSOLUTA? Esta ação não pode ser desfeita!')) {
+                    localStorage.removeItem('sisPorta_coord_territorios');
+                    localStorage.removeItem('sisPorta_coord_colaboradors');
+                    localStorage.removeItem('sisPorta_coord_devolucoes');
+                    localStorage.removeItem('sisPorta_coord_config');
+                    
+                    territorios = [];
+                    colaboradors = [];
+                    devolucoes = [];
+                    config = { ubs: '', gestor: '' };
+                    
+                    fecharModal('modalConfiguracoes');
+                    atualizarTodasInterfaces();
+                    alert('✅ Todos os dados foram excluídos!');
+                }
+            }
+        }
+
+        // === UTILIDADES ===
+        function getBadgeClass(status) {
+            const classes = {
+                'aguardando_designacao': 'badge-aguardando',
+                'em_andamento': 'badge-andamento',
+                'concluido': 'badge-concluido',
+                'parcialmente_concluido': 'badge-parcial'
+            };
+            return classes[status] || 'badge-aguardando';
+        }
+
+        function getStatusText(status) {
+            const textos = {
+                'aguardando_designacao': '⏳ Aguardando',
+                'em_andamento': '🔄 Em Andamento',
+                'concluido': '✅ Concluído',
+                'parcialmente_concluido': '⚠️ Parcial'
+            };
+            return textos[status] || status;
+        }
+
+        function formatarData(isoString) {
+            const data = new Date(isoString);
+            return data.toLocaleString('pt-BR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function fecharModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            if (modalId === 'modalTerritorio') {
+                territorioAtual = null;
+            }
+        }
+    </script>
+</body>
+</html>
