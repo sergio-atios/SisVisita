@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SisPorta - Coordenador</title>
+    <title>SisPorta - Gestor</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f97316">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SisPorta Coord">
+    <meta name="apple-mobile-web-app-title" content="SisPorta Gestor">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -199,9 +199,9 @@
             <div class="flex items-center justify-between flex-wrap gap-4">
                 <div>
                     <h1 class="text-4xl font-bold text-white flex items-center gap-2">
-                        <span class="text-5xl">🏥</span> SisPorta
+                        <span class="text-5xl">👥</span> SisPorta
                     </h1>
-                    <p class="text-gray-400 text-sm">Coordenador Local</p>
+                    <p class="text-gray-400 text-sm">Gestor</p>
                 </div>
                 <div class="flex gap-3">
                     <button onclick="abrirModalConfiguracoes()" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white">
@@ -220,8 +220,8 @@
                 <button onclick="navegarPara('territorios')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
                     📍 Territórios
                 </button>
-                <button onclick="navegarPara('agentes')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
-                    👥 Agentes
+                <button onclick="navegarPara('colaboradores')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
+                    👥 Colaboradores
                 </button>
                 <button onclick="navegarPara('devolucoes')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
                     📥 Devoluções
@@ -299,19 +299,19 @@
             </div>
         </section>
 
-        <!-- Seção: Agentes -->
-        <section id="secao-agentes" class="hidden fade-in">
+        <!-- Seção: Colaboradores -->
+        <section id="secao-colaboradores" class="hidden fade-in">
             <div class="card-neobrutal p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-white">👥 Gerenciar Agentes</h2>
-                    <button onclick="abrirModalNovoAgente()" class="btn-primary bg-gradient-to-r from-cyan-500 to-blue-600 text-white flex items-center gap-2">
+                    <h2 class="text-2xl font-bold text-white">👥 Gerenciar Colaboradores</h2>
+                    <button onclick="abrirModalNovoColaborador()" class="btn-primary bg-gradient-to-r from-cyan-500 to-blue-600 text-white flex items-center gap-2">
                         <i data-lucide="user-plus" class="w-5 h-5"></i>
-                        Adicionar Agente
+                        Adicionar Colaborador
                     </button>
                 </div>
 
-                <div id="listaAgentes" class="space-y-3">
-                    <!-- Agentes serão inseridos aqui -->
+                <div id="listaColaboradores" class="space-y-3">
+                    <!-- Colaboradores serão inseridos aqui -->
                 </div>
             </div>
         </section>
@@ -319,8 +319,8 @@
         <!-- Seção: Devoluções -->
         <section id="secao-devolucoes" class="hidden fade-in">
             <div class="card-neobrutal p-6 mb-6">
-                <h2 class="text-2xl font-bold text-white mb-4">📥 Importar Devoluções de Agentes</h2>
-                <p class="text-gray-400 mb-4">Importe os territórios devolvidos pelos agentes de campo.</p>
+                <h2 class="text-2xl font-bold text-white mb-4">📥 Importar Devoluções de Colaboradors</h2>
+                <p class="text-gray-400 mb-4">Importe os territórios devolvidos pelos colaboradors de campo.</p>
                 
                 <label class="btn-primary bg-gradient-to-r from-green-500 to-emerald-600 text-white cursor-pointer inline-flex items-center gap-2">
                     <i data-lucide="upload" class="w-5 h-5"></i>
@@ -367,11 +367,11 @@
                         </div>
                     </div>
 
-                    <!-- Designar Agente -->
+                    <!-- Designar Colaborador -->
                     <div class="p-4 bg-blue-900/20 border border-blue-600 rounded-lg">
-                        <h4 class="text-white font-semibold mb-3">👤 Designar para Agente</h4>
-                        <select id="modalAgenteSelect" class="input-neobrutal mb-3">
-                            <option value="">Selecione um agente...</option>
+                        <h4 class="text-white font-semibold mb-3">👤 Designar para Colaborador</h4>
+                        <select id="modalColaboradorSelect" class="input-neobrutal mb-3">
+                            <option value="">Selecione um colaborador...</option>
                         </select>
                         <button onclick="designarTerritorio()" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white w-full">
                             Designar e Exportar
@@ -395,27 +395,27 @@
             </div>
         </div>
 
-        <!-- Modal: Novo Agente -->
-        <div id="modalNovoAgente" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalNovoAgente')">
+        <!-- Modal: Novo Colaborador -->
+        <div id="modalNovoColaborador" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalNovoColaborador')">
             <div class="card-neobrutal w-full max-w-md p-6" onclick="event.stopPropagation()">
-                <h3 class="text-2xl font-bold text-white mb-4">👤 Adicionar Agente</h3>
+                <h3 class="text-2xl font-bold text-white mb-4">👤 Adicionar Colaborador</h3>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Agente</label>
-                        <input type="text" id="novoAgenteNome" class="input-neobrutal" placeholder="Ex: Maria Silva">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Colaborador</label>
+                        <input type="text" id="novoColaboradorNome" class="input-neobrutal" placeholder="Ex: Maria Silva">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Telefone (Opcional)</label>
-                        <input type="text" id="novoAgenteTelefone" class="input-neobrutal" placeholder="Ex: (11) 98765-4321">
+                        <input type="text" id="novoColaboradorTelefone" class="input-neobrutal" placeholder="Ex: (11) 98765-4321">
                     </div>
 
                     <div class="flex gap-3">
-                        <button onclick="salvarNovoAgente()" class="btn-primary bg-green-600 hover:bg-green-700 text-white flex-1">
+                        <button onclick="salvarNovoColaborador()" class="btn-primary bg-green-600 hover:bg-green-700 text-white flex-1">
                             Salvar
                         </button>
-                        <button onclick="fecharModal('modalNovoAgente')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                        <button onclick="fecharModal('modalNovoColaborador')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
                             Cancelar
                         </button>
                     </div>
@@ -430,13 +430,13 @@
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome da UBS</label>
-                        <input type="text" id="configUBS" class="input-neobrutal" placeholder="Ex: UBS Central">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome da Unidade</label>
+                        <input type="text" id="configUnidade" class="input-neobrutal" placeholder="Ex: Unidade Central">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Coordenador</label>
-                        <input type="text" id="configCoordenador" class="input-neobrutal" placeholder="Ex: João Silva">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Gestor</label>
+                        <input type="text" id="configGestor" class="input-neobrutal" placeholder="Ex: João Silva">
                     </div>
 
                     <div class="p-4 bg-red-900/20 border border-red-600 rounded-lg">
@@ -463,11 +463,11 @@
     <script>
         // Variáveis Globais
         let territorios = [];
-        let agentes = [];
+        let colaboradors = [];
         let devolucoes = [];
         let config = {
             ubs: '',
-            coordenador: ''
+            gestor: ''
         };
         let territorioAtual = null;
 
@@ -492,19 +492,19 @@
         // === GESTÃO DE DADOS ===
         function carregarDados() {
             const territoriosSalvos = localStorage.getItem('sisPorta_coord_territorios');
-            const agentesSalvos = localStorage.getItem('sisPorta_coord_agentes');
+            const colaboradorsSalvos = localStorage.getItem('sisPorta_coord_colaboradors');
             const devolicoesSalvas = localStorage.getItem('sisPorta_coord_devolucoes');
             const configSalva = localStorage.getItem('sisPorta_coord_config');
 
             if (territoriosSalvos) territorios = JSON.parse(territoriosSalvos);
-            if (agentesSalvos) agentes = JSON.parse(agentesSalvos);
+            if (colaboradorsSalvos) colaboradors = JSON.parse(colaboradorsSalvos);
             if (devolicoesSalvas) devolucoes = JSON.parse(devolicoesSalvas);
             if (configSalva) config = JSON.parse(configSalva);
         }
 
         function salvarDados() {
             localStorage.setItem('sisPorta_coord_territorios', JSON.stringify(territorios));
-            localStorage.setItem('sisPorta_coord_agentes', JSON.stringify(agentes));
+            localStorage.setItem('sisPorta_coord_colaboradors', JSON.stringify(colaboradors));
             localStorage.setItem('sisPorta_coord_devolucoes', JSON.stringify(devolucoes));
             localStorage.setItem('sisPorta_coord_config', JSON.stringify(config));
         }
@@ -531,7 +531,7 @@
             // Atualizar interface da seção
             if (secao === 'dashboard') atualizarDashboard();
             if (secao === 'territorios') atualizarListaTerritorios();
-            if (secao === 'agentes') atualizarListaAgentes();
+            if (secao === 'colaboradors') atualizarListaColaboradors();
             if (secao === 'devolucoes') atualizarHistoricoDevolucoes();
 
             lucide.createIcons();
@@ -540,7 +540,7 @@
         function atualizarTodasInterfaces() {
             atualizarDashboard();
             atualizarListaTerritorios();
-            atualizarListaAgentes();
+            atualizarListaColaboradors();
             atualizarHistoricoDevolucoes();
             lucide.createIcons();
         }
@@ -597,7 +597,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <div class="text-white font-semibold">${dev.territorio_nome}</div>
-                                <div class="text-sm text-gray-400">Agente: ${dev.agente}</div>
+                                <div class="text-sm text-gray-400">Colaborador: ${dev.colaborador}</div>
                             </div>
                             <span class="badge ${getBadgeClass(dev.status)}">${getStatusText(dev.status)}</span>
                         </div>
@@ -671,7 +671,7 @@
                         
                         <div class="text-sm text-gray-400 mb-3">
                             <div>ID: ${t.territorio_id}</div>
-                            ${t.agente ? `<div>Agente: ${t.agente}</div>` : ''}
+                            ${t.colaborador ? `<div>Colaborador: ${t.colaborador}</div>` : ''}
                         </div>
 
                         <div class="grid grid-cols-3 gap-2 text-center text-xs">
@@ -711,10 +711,10 @@
             document.getElementById('modalTerritorioTotal').textContent = territorio.estatisticas.total_residencias;
             document.getElementById('modalTerritorioVisitadas').textContent = territorio.estatisticas.visitadas;
 
-            // Preencher select de agentes
-            const select = document.getElementById('modalAgenteSelect');
-            select.innerHTML = '<option value="">Selecione um agente...</option>';
-            agentes.forEach(a => {
+            // Preencher select de colaboradors
+            const select = document.getElementById('modalColaboradorSelect');
+            select.innerHTML = '<option value="">Selecione um colaborador...</option>';
+            colaboradors.forEach(a => {
                 select.innerHTML += `<option value="${a.nome}">${a.nome}</option>`;
             });
 
@@ -724,33 +724,33 @@
         async function designarTerritorio() {
             if (!territorioAtual) return;
 
-            const agenteNome = document.getElementById('modalAgenteSelect').value;
-            if (!agenteNome) {
-                alert('⚠️ Selecione um agente!');
+            const colaboradorNome = document.getElementById('modalColaboradorSelect').value;
+            if (!colaboradorNome) {
+                alert('⚠️ Selecione um colaborador!');
                 return;
             }
 
-            territorioAtual.agente = agenteNome;
+            territorioAtual.colaborador = colaboradorNome;
             territorioAtual.status = 'em_andamento';
-            territorioAtual.coordenador = config.coordenador;
+            territorioAtual.gestor = config.gestor;
             territorioAtual.ubs = config.ubs;
 
             salvarDados();
             
             // Usar compartilhamento híbrido
             if (window.SisPortaShare) {
-                await compartilharTerritorioAgente(territorioAtual, agenteNome);
+                await compartilharTerritorioColaborador(territorioAtual, colaboradorNome);
             } else {
                 // Fallback: exportar arquivo tradicional
-                exportarArquivoTradicional(territorioAtual, agenteNome);
+                exportarArquivoTradicional(territorioAtual, colaboradorNome);
             }
             
             fecharModal('modalTerritorio');
             atualizarTodasInterfaces();
         }
 
-        async function compartilharTerritorioAgente(territorio, agenteNome) {
-            const resultado = await SisPortaShare.compartilhar(territorio, 'agente');
+        async function compartilharTerritorioColaborador(territorio, colaboradorNome) {
+            const resultado = await SisPortaShare.compartilhar(territorio, 'colaborador');
             
             if (!resultado.sucesso) {
                 alert('❌ Erro ao compartilhar: ' + resultado.erro);
@@ -764,7 +764,7 @@
                 // Tentar Share API nativo
                 const compartilhado = await SisPortaShare.compartilharNativo(
                     'SisPorta - Território',
-                    `Território: ${territorio.nome}\nAgente: ${agenteNome}`,
+                    `Território: ${territorio.nome}\nColaborador: ${colaboradorNome}`,
                     link
                 );
 
@@ -773,17 +773,17 @@
                     await SisPortaShare.copiarParaClipboard(link);
                     alert(
                         `✅ Link copiado!\n\n` +
-                        `📋 Cole no WhatsApp e envie para ${agenteNome}\n\n` +
+                        `📋 Cole no WhatsApp e envie para ${colaboradorNome}\n\n` +
                         `Link: ${link}`
                     );
                 } else {
-                    alert(`✅ Território compartilhado via link para ${agenteNome}!`);
+                    alert(`✅ Território compartilhado via link para ${colaboradorNome}!`);
                 }
             }
             
             // Método usado: QR Code
             else if (resultado.metodo === 'qrcode') {
-                mostrarModalQRCode(resultado.dados, agenteNome);
+                mostrarModalQRCode(resultado.dados, colaboradorNome);
             }
             
             // Método usado: Arquivo
@@ -793,38 +793,38 @@
                 link.download = resultado.dados.nome;
                 link.click();
                 URL.revokeObjectURL(resultado.dados.url);
-                alert(`✅ Arquivo baixado! Envie para ${agenteNome} via WhatsApp.`);
+                alert(`✅ Arquivo baixado! Envie para ${colaboradorNome} via WhatsApp.`);
             }
         }
 
-        function exportarArquivoTradicional(territorio, agenteNome) {
+        function exportarArquivoTradicional(territorio, colaboradorNome) {
             const dataStr = JSON.stringify(territorio, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             
             link.href = url;
-            link.download = `territorio_${territorio.territorio_id}_${agenteNome.replace(/\s+/g, '_')}.json`;
+            link.download = `territorio_${territorio.territorio_id}_${colaboradorNome.replace(/\s+/g, '_')}.json`;
             link.click();
             
             URL.revokeObjectURL(url);
-            alert(`✅ Território designado para ${agenteNome}!`);
+            alert(`✅ Território designado para ${colaboradorNome}!`);
         }
 
-        function mostrarModalQRCode(dados, agenteNome) {
+        function mostrarModalQRCode(dados, colaboradorNome) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4';
             modal.innerHTML = `
                 <div class="card-neobrutal w-full max-w-md p-6 text-center" onclick="event.stopPropagation()">
                     <h3 class="text-2xl font-bold text-white mb-4">📱 Compartilhar via QR Code</h3>
-                    <p class="text-gray-400 mb-4">Agente: ${agenteNome}</p>
+                    <p class="text-gray-400 mb-4">Colaborador: ${colaboradorNome}</p>
                     
                     <div class="bg-white p-4 rounded-lg mb-4 inline-block">
                         ${dados.qrCodeSVG}
                     </div>
                     
                     <p class="text-sm text-gray-400 mb-4">
-                        ${agenteNome} deve escanear este QR Code com a câmera do celular
+                        ${colaboradorNome} deve escanear este QR Code com a câmera do celular
                     </p>
                     
                     <div class="p-3 bg-blue-900/20 border border-blue-600 rounded-lg mb-4">
@@ -892,23 +892,23 @@
             }
         }
 
-        // === AGENTES ===
-        function atualizarListaAgentes() {
-            const container = document.getElementById('listaAgentes');
+        // === COLABORADORS ===
+        function atualizarListaColaboradors() {
+            const container = document.getElementById('listaColaboradors');
             
-            if (agentes.length === 0) {
+            if (colaboradors.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8 text-gray-400">
                         <div class="text-4xl mb-2">👥</div>
-                        Nenhum agente cadastrado
+                        Nenhum colaborador cadastrado
                     </div>
                 `;
                 return;
             }
 
             let html = '';
-            agentes.forEach(a => {
-                const territoriosAtivos = territorios.filter(t => t.agente === a.nome && t.status === 'em_andamento').length;
+            colaboradors.forEach(a => {
+                const territoriosAtivos = territorios.filter(t => t.colaborador === a.nome && t.status === 'em_andamento').length;
                 
                 html += `
                     <div class="p-4 bg-slate-700/50 rounded-lg flex justify-between items-center">
@@ -917,7 +917,7 @@
                             ${a.telefone ? `<div class="text-sm text-gray-400">${a.telefone}</div>` : ''}
                             <div class="text-xs text-gray-500 mt-1">${territoriosAtivos} território(s) ativo(s)</div>
                         </div>
-                        <button onclick="excluirAgente('${a.nome}')" class="btn-primary bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2">
+                        <button onclick="excluirColaborador('${a.nome}')" class="btn-primary bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2">
                             🗑️
                         </button>
                     </div>
@@ -927,40 +927,40 @@
             container.innerHTML = html;
         }
 
-        function abrirModalNovoAgente() {
-            document.getElementById('novoAgenteNome').value = '';
-            document.getElementById('novoAgenteTelefone').value = '';
-            document.getElementById('modalNovoAgente').classList.remove('hidden');
+        function abrirModalNovoColaborador() {
+            document.getElementById('novoColaboradorNome').value = '';
+            document.getElementById('novoColaboradorTelefone').value = '';
+            document.getElementById('modalNovoColaborador').classList.remove('hidden');
         }
 
-        function salvarNovoAgente() {
-            const nome = document.getElementById('novoAgenteNome').value.trim();
-            const telefone = document.getElementById('novoAgenteTelefone').value.trim();
+        function salvarNovoColaborador() {
+            const nome = document.getElementById('novoColaboradorNome').value.trim();
+            const telefone = document.getElementById('novoColaboradorTelefone').value.trim();
 
             if (!nome) {
-                alert('⚠️ Informe o nome do agente!');
+                alert('⚠️ Informe o nome do colaborador!');
                 return;
             }
 
-            const existe = agentes.find(a => a.nome === nome);
+            const existe = colaboradors.find(a => a.nome === nome);
             if (existe) {
-                alert('⚠️ Já existe um agente com este nome!');
+                alert('⚠️ Já existe um colaborador com este nome!');
                 return;
             }
 
-            agentes.push({ nome, telefone });
+            colaboradors.push({ nome, telefone });
             salvarDados();
-            fecharModal('modalNovoAgente');
-            atualizarListaAgentes();
-            alert('✅ Agente adicionado com sucesso!');
+            fecharModal('modalNovoColaborador');
+            atualizarListaColaboradors();
+            alert('✅ Colaborador adicionado com sucesso!');
         }
 
-        function excluirAgente(nome) {
-            if (confirm(`⚠️ Tem certeza que deseja excluir o agente "${nome}"?`)) {
-                agentes = agentes.filter(a => a.nome !== nome);
+        function excluirColaborador(nome) {
+            if (confirm(`⚠️ Tem certeza que deseja excluir o colaborador "${nome}"?`)) {
+                colaboradors = colaboradors.filter(a => a.nome !== nome);
                 salvarDados();
-                atualizarListaAgentes();
-                alert('✅ Agente excluído!');
+                atualizarListaColaboradors();
+                alert('✅ Colaborador excluído!');
             }
         }
 
@@ -991,7 +991,7 @@
                     devolucoes.push({
                         territorio_id: dados.territorio_id,
                         territorio_nome: dados.nome,
-                        agente: dados.agente,
+                        colaborador: dados.colaborador,
                         status: dados.status,
                         data_devolucao: new Date().toISOString(),
                         percentual_conclusao: dados.estatisticas.percentual_conclusao
@@ -1029,7 +1029,7 @@
                             <div>
                                 <div class="text-white font-semibold">${dev.territorio_nome}</div>
                                 <div class="text-sm text-gray-400">ID: ${dev.territorio_id}</div>
-                                <div class="text-sm text-gray-400">Agente: ${dev.agente}</div>
+                                <div class="text-sm text-gray-400">Colaborador: ${dev.colaborador}</div>
                             </div>
                             <span class="badge ${getBadgeClass(dev.status)}">${getStatusText(dev.status)}</span>
                         </div>
@@ -1046,14 +1046,14 @@
 
         // === CONFIGURAÇÕES ===
         function abrirModalConfiguracoes() {
-            document.getElementById('configUBS').value = config.ubs || '';
-            document.getElementById('configCoordenador').value = config.coordenador || '';
+            document.getElementById('configUnidade').value = config.ubs || '';
+            document.getElementById('configGestor').value = config.gestor || '';
             document.getElementById('modalConfiguracoes').classList.remove('hidden');
         }
 
         function salvarConfiguracoes() {
-            config.ubs = document.getElementById('configUBS').value.trim();
-            config.coordenador = document.getElementById('configCoordenador').value.trim();
+            config.ubs = document.getElementById('configUnidade').value.trim();
+            config.gestor = document.getElementById('configGestor').value.trim();
             
             salvarDados();
             fecharModal('modalConfiguracoes');
@@ -1061,17 +1061,17 @@
         }
 
         function limparTodosDados() {
-            if (confirm('⚠️ ATENÇÃO! Esta ação irá excluir TODOS os dados (territórios, agentes, devoluções e configurações).\n\nDeseja continuar?')) {
+            if (confirm('⚠️ ATENÇÃO! Esta ação irá excluir TODOS os dados (territórios, colaboradors, devoluções e configurações).\n\nDeseja continuar?')) {
                 if (confirm('⚠️ Tem CERTEZA ABSOLUTA? Esta ação não pode ser desfeita!')) {
                     localStorage.removeItem('sisPorta_coord_territorios');
-                    localStorage.removeItem('sisPorta_coord_agentes');
+                    localStorage.removeItem('sisPorta_coord_colaboradors');
                     localStorage.removeItem('sisPorta_coord_devolucoes');
                     localStorage.removeItem('sisPorta_coord_config');
                     
                     territorios = [];
-                    agentes = [];
+                    colaboradors = [];
                     devolucoes = [];
-                    config = { ubs: '', coordenador: '' };
+                    config = { ubs: '', gestor: '' };
                     
                     fecharModal('modalConfiguracoes');
                     atualizarTodasInterfaces();
