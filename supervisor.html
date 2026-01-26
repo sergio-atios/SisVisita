@@ -202,7 +202,7 @@
                 <button onclick="navegarPara('territorios')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
                     📍 Territórios
                 </button>
-                <button onclick="navegarPara('ubs')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
+                <button onclick="navegarPara('unidades')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
                     🏥 Unidade
                 </button>
                 <button onclick="navegarPara('relatorios')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
@@ -216,7 +216,7 @@
             <!-- Estatísticas Gerais -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 <div class="stat-card rounded-lg p-6 text-center">
-                    <div class="text-4xl font-bold text-pink-400" id="dashTotalUBS">0</div>
+                    <div class="text-4xl font-bold text-pink-400" id="dashTotalUnidades">0</div>
                     <div class="text-sm text-gray-400">Unidade Cadastradas</div>
                 </div>
                 <div class="stat-card rounded-lg p-6 text-center">
@@ -245,7 +245,7 @@
                 </div>
                 <div class="card-neobrutal p-6">
                     <h3 class="text-xl font-bold text-white mb-4">📈 Progresso por Unidade</h3>
-                    <canvas id="graficoUBS"></canvas>
+                    <canvas id="graficoUnidades"></canvas>
                 </div>
             </div>
 
@@ -303,17 +303,17 @@
         </section>
 
         <!-- Seção: Unidade -->
-        <section id="secao-ubs" class="hidden fade-in">
+        <section id="secao-unidades" class="hidden fade-in">
             <div class="card-neobrutal p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-bold text-white">🏥 Gerenciar Unidade</h2>
-                    <button onclick="abrirModalNovaUBS()" class="btn-primary bg-gradient-to-r from-cyan-500 to-blue-600 text-white flex items-center gap-2">
+                    <button onclick="abrirModalNovaUnidade()" class="btn-primary bg-gradient-to-r from-cyan-500 to-blue-600 text-white flex items-center gap-2">
                         <i data-lucide="plus" class="w-5 h-5"></i>
                         Nova Unidade
                     </button>
                 </div>
 
-                <div id="listaUBS" class="space-y-3">
+                <div id="listaUnidades" class="space-y-3">
                     <!-- Unidade serão inseridas aqui -->
                 </div>
             </div>
@@ -325,7 +325,7 @@
                 <!-- Relatório por Unidade -->
                 <div class="card-neobrutal p-6">
                     <h3 class="text-xl font-bold text-white mb-4">📊 Relatório por Unidade</h3>
-                    <div id="relatorioUBS" class="space-y-3">
+                    <div id="relatorioUnidades" class="space-y-3">
                         <!-- Será preenchido dinamicamente -->
                     </div>
                 </div>
@@ -456,31 +456,31 @@
         </div>
 
         <!-- Modal: Nova Unidade -->
-        <div id="modalNovaUBS" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalNovaUBS')">
+        <div id="modalNovaUnidade" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalNovaUnidade')">
             <div class="card-neobrutal w-full max-w-md p-6" onclick="event.stopPropagation()">
                 <h3 class="text-2xl font-bold text-white mb-4">🏥 Adicionar Unidade</h3>
                 
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Nome da Unidade *</label>
-                        <input type="text" id="novaUBSNome" class="input-neobrutal" placeholder="Ex: Unidade Central">
+                        <input type="text" id="novaUnidadeNome" class="input-neobrutal" placeholder="Ex: Unidade Central">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Endereço</label>
-                        <input type="text" id="novaUBSEndereco" class="input-neobrutal" placeholder="Rua, número, bairro">
+                        <input type="text" id="novaUnidadeEndereco" class="input-neobrutal" placeholder="Rua, número, bairro">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Gestor Responsável</label>
-                        <input type="text" id="novaUBSGestor" class="input-neobrutal" placeholder="Nome do gestor">
+                        <input type="text" id="novaUnidadeGestor" class="input-neobrutal" placeholder="Nome do gestor">
                     </div>
 
                     <div class="flex gap-3">
-                        <button onclick="salvarNovaUBS()" class="btn-primary bg-green-600 hover:bg-green-700 text-white flex-1">
+                        <button onclick="salvarNovaUnidade()" class="btn-primary bg-green-600 hover:bg-green-700 text-white flex-1">
                             Salvar
                         </button>
-                        <button onclick="fecharModal('modalNovaUBS')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                        <button onclick="fecharModal('modalNovaUnidade')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
                             Cancelar
                         </button>
                     </div>
@@ -547,7 +547,7 @@
     <script>
         // Variáveis Globais
         let territorios = [];
-        let ubs = [];
+        let unidades = [];
         let config = {
             administrador: '',
             regiao: ''
@@ -577,17 +577,17 @@
         // === GESTÃO DE DADOS ===
         function carregarDados() {
             const territoriosSalvos = localStorage.getItem('sisPorta_super_territorios');
-            const ubsSalvas = localStorage.getItem('sisPorta_super_ubs');
+            const unidadesSalvas = localStorage.getItem('sisPorta_super_unidades');
             const configSalva = localStorage.getItem('sisPorta_super_config');
 
             if (territoriosSalvos) territorios = JSON.parse(territoriosSalvos);
-            if (ubsSalvas) ubs = JSON.parse(ubsSalvas);
+            if (unidadesSalvas) unidades = JSON.parse(unidadesSalvas);
             if (configSalva) config = JSON.parse(configSalva);
         }
 
         function salvarDados() {
             localStorage.setItem('sisPorta_super_territorios', JSON.stringify(territorios));
-            localStorage.setItem('sisPorta_super_ubs', JSON.stringify(ubs));
+            localStorage.setItem('sisPorta_super_unidades', JSON.stringify(unidades));
             localStorage.setItem('sisPorta_super_config', JSON.stringify(config));
         }
 
@@ -606,7 +606,7 @@
 
             if (secao === 'dashboard') atualizarDashboard();
             if (secao === 'territorios') atualizarListaTerritorios();
-            if (secao === 'ubs') atualizarListaUBS();
+            if (secao === 'unidades') atualizarListaUnidades();
             if (secao === 'relatorios') atualizarRelatorios();
 
             lucide.createIcons();
@@ -615,14 +615,14 @@
         function atualizarTodasInterfaces() {
             atualizarDashboard();
             atualizarListaTerritorios();
-            atualizarListaUBS();
+            atualizarListaUnidades();
             atualizarRelatorios();
             lucide.createIcons();
         }
 
         // === DASHBOARD ===
         function atualizarDashboard() {
-            const totalUBS = ubs.length;
+            const totalUnidades = unidades.length;
             const totalTerritorios = territorios.length;
             
             let totalResidencias = 0;
@@ -635,7 +635,7 @@
 
             const percentual = totalResidencias > 0 ? ((visitadas / totalResidencias) * 100).toFixed(1) : 0;
 
-            document.getElementById('dashTotalUBS').textContent = totalUBS;
+            document.getElementById('dashTotalUnidades').textContent = totalUnidades;
             document.getElementById('dashTotalTerritorios').textContent = totalTerritorios;
             document.getElementById('dashTotalResidencias').textContent = totalResidencias;
             document.getElementById('dashVisitadas').textContent = visitadas;
@@ -673,24 +673,24 @@
             });
 
             // Gráfico por Unidade
-            const ubsLabels = ubs.map(u => u.nome);
-            const ubsData = ubs.map(u => {
-                const terrs = territorios.filter(t => t.ubs === u.nome);
+            const unidadesLabels = unidades.map(u => u.nome);
+            const unidadesData = unidades.map(u => {
+                const terrs = territorios.filter(t => t.unidades === u.nome);
                 const total = terrs.reduce((sum, t) => sum + t.estatisticas.total_residencias, 0);
                 const vis = terrs.reduce((sum, t) => sum + t.estatisticas.visitadas, 0);
                 return total > 0 ? ((vis / total) * 100).toFixed(1) : 0;
             });
 
-            if (graficos.ubs) graficos.ubs.destroy();
+            if (graficos.unidades) graficos.unidades.destroy();
             
-            const ctxUBS = document.getElementById('graficoUBS').getContext('2d');
-            graficos.ubs = new Chart(ctxUBS, {
+            const ctxUnidades = document.getElementById('graficoUnidades').getContext('2d');
+            graficos.unidades = new Chart(ctxUnidades, {
                 type: 'bar',
                 data: {
-                    labels: ubsLabels,
+                    labels: unidadesLabels,
                     datasets: [{
                         label: 'Progresso (%)',
-                        data: ubsData,
+                        data: unidadesData,
                         backgroundColor: '#ec4899'
                     }]
                 },
@@ -732,7 +732,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <div class="text-white font-semibold">${t.nome}</div>
-                                <div class="text-sm text-gray-400">Unidade: ${t.ubs} • Colaborador: ${t.colaborador || 'Não designado'}</div>
+                                <div class="text-sm text-gray-400">Unidade: ${t.unidades} • Colaborador: ${t.colaborador || 'Não designado'}</div>
                             </div>
                             <span class="text-orange-400 text-sm">⚠️ Sem atualização há 7+ dias</span>
                         </div>
@@ -758,9 +758,9 @@
             atualizarListaResidenciasNovas();
 
             // Preencher select de Unidade
-            const select = document.getElementById('novoTerrUBS');
+            const select = document.getElementById('novoTerrUnidade');
             select.innerHTML = '<option value="">Selecione...</option>';
-            ubs.forEach(u => {
+            unidades.forEach(u => {
                 select.innerHTML += `<option value="${u.nome}">${u.nome}</option>`;
             });
 
@@ -840,12 +840,12 @@
         function salvarNovoTerritorio() {
             const nome = document.getElementById('novoTerrNome').value.trim();
             const id = document.getElementById('novoTerrID').value.trim();
-            const ubsNome = document.getElementById('novoTerrUnidade').value;
+            const unidadeNome = document.getElementById('novoTerrUnidade').value;
             const regiao = document.getElementById('novoTerrRegiao').value.trim();
             const modal = document.getElementById('modalNovoTerritorio');
             const editandoId = modal.dataset.editando;
 
-            if (!nome || !id || !ubsNome) {
+            if (!nome || !id || !unidadeNome) {
                 alert('⚠️ Preencha todos os campos obrigatórios (*)!');
                 return;
             }
@@ -865,7 +865,7 @@
                     territorios[territorioIndex] = {
                         ...territorioAntigo,
                         nome: nome,
-                        ubs: ubsNome,
+                        unidades: unidadeNome,
                         atualizado_em: new Date().toISOString(),
                         residencias: residenciasNovas,
                         estatisticas: {
@@ -897,7 +897,7 @@
                 versao: '1.0',
                 territorio_id: id,
                 nome: nome,
-                ubs: ubsNome,
+                unidades: unidadeNome,
                 gestor: null,
                 colaborador: null,
                 status: 'aguardando_designacao',
@@ -998,7 +998,7 @@
                         
                         <div class="text-sm text-gray-400 mb-3">
                             <div>ID: ${t.territorio_id}</div>
-                            <div>Unidade: ${t.ubs}</div>
+                            <div>Unidade: ${t.unidades}</div>
                             ${t.colaborador ? `<div>Colaborador: ${t.colaborador}</div>` : ''}
                         </div>
 
@@ -1066,8 +1066,8 @@
             // Preencher select de Unidade
             const select = document.getElementById('novoTerrUnidade');
             select.innerHTML = '<option value="">Selecione...</option>';
-            ubs.forEach(u => {
-                const selected = u.nome === territorio.ubs ? 'selected' : '';
+            unidades.forEach(u => {
+                const selected = u.nome === territorio.unidades ? 'selected' : '';
                 select.innerHTML += `<option value="${u.nome}" ${selected}>${u.nome}</option>`;
             });
 
@@ -1093,42 +1093,42 @@
         }
 
         // === Unidade ===
-        function abrirModalNovaUBS() {
-            document.getElementById('novaUBSNome').value = '';
-            document.getElementById('novaUBSEndereco').value = '';
-            document.getElementById('novaUBSGestor').value = '';
-            document.getElementById('modalNovaUBS').classList.remove('hidden');
+        function abrirModalNovaUnidade() {
+            document.getElementById('novaUnidadeNome').value = '';
+            document.getElementById('novaUnidadeEndereco').value = '';
+            document.getElementById('novaUnidadeGestor').value = '';
+            document.getElementById('modalNovaUnidade').classList.remove('hidden');
         }
 
-        function salvarNovaUBS() {
-            const nome = document.getElementById('novaUBSNome').value.trim();
+        function salvarNovaUnidade() {
+            const nome = document.getElementById('novaUnidadeNome').value.trim();
             
             if (!nome) {
                 alert('⚠️ Informe o nome da Unidade!');
                 return;
             }
 
-            if (ubs.find(u => u.nome === nome)) {
+            if (unidades.find(u => u.nome === nome)) {
                 alert('⚠️ Já existe uma Unidade com este nome!');
                 return;
             }
 
-            ubs.push({
+            unidades.push({
                 nome: nome,
-                endereco: document.getElementById('novaUBSEndereco').value.trim(),
-                gestor: document.getElementById('novaUBSGestor').value.trim()
+                endereco: document.getElementById('novaUnidadeEndereco').value.trim(),
+                gestor: document.getElementById('novaUnidadeGestor').value.trim()
             });
 
             salvarDados();
-            fecharModal('modalNovaUBS');
-            atualizarListaUBS();
+            fecharModal('modalNovaUnidade');
+            atualizarListaUnidades();
             alert('✅ Unidade adicionada com sucesso!');
         }
 
-        function atualizarListaUBS() {
-            const container = document.getElementById('listaUBS');
+        function atualizarListaUnidades() {
+            const container = document.getElementById('listaUnidades');
             
-            if (ubs.length === 0) {
+            if (unidades.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8 text-gray-400">
                         <div class="text-4xl mb-2">🏥</div>
@@ -1139,8 +1139,8 @@
             }
 
             let html = '';
-            ubs.forEach(u => {
-                const terrs = territorios.filter(t => t.ubs === u.nome);
+            unidades.forEach(u => {
+                const terrs = territorios.filter(t => t.unidades === u.nome);
                 html += `
                     <div class="p-4 bg-slate-700/50 rounded-lg flex justify-between items-center">
                         <div>
@@ -1149,7 +1149,7 @@
                             ${u.gestor ? `<div class="text-sm text-gray-400">Gestor: ${u.gestor}</div>` : ''}
                             <div class="text-xs text-gray-500 mt-1">${terrs.length} território(s)</div>
                         </div>
-                        <button onclick="excluirUBS('${u.nome}')" class="btn-primary bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2">
+                        <button onclick="excluirUnidade('${u.nome}')" class="btn-primary bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2">
                             🗑️
                         </button>
                     </div>
@@ -1159,17 +1159,17 @@
             container.innerHTML = html;
         }
 
-        function excluirUBS(nome) {
-            const terrs = territorios.filter(t => t.ubs === nome);
+        function excluirUnidade(nome) {
+            const terrs = territorios.filter(t => t.unidades === nome);
             if (terrs.length > 0) {
                 alert('⚠️ Não é possível excluir esta Unidade pois existem territórios vinculados a ela!');
                 return;
             }
 
             if (confirm(`⚠️ Tem certeza que deseja excluir "${nome}"?`)) {
-                ubs = ubs.filter(u => u.nome !== nome);
+                unidades = unidades.filter(u => u.nome !== nome);
                 salvarDados();
-                atualizarListaUBS();
+                atualizarListaUnidades();
                 alert('✅ Unidade excluída!');
             }
         }
@@ -1177,16 +1177,16 @@
         // === RELATÓRIOS ===
         function atualizarRelatorios() {
             // Relatório por Unidade
-            const containerUBS = document.getElementById('relatorioUBS');
-            let htmlUBS = '';
+            const containerUnidades = document.getElementById('relatorioUnidades');
+            let htmlUnidades = '';
             
-            ubs.forEach(u => {
-                const terrs = territorios.filter(t => t.ubs === u.nome);
+            unidades.forEach(u => {
+                const terrs = territorios.filter(t => t.unidades === u.nome);
                 const total = terrs.reduce((sum, t) => sum + t.estatisticas.total_residencias, 0);
                 const vis = terrs.reduce((sum, t) => sum + t.estatisticas.visitadas, 0);
                 const perc = total > 0 ? ((vis / total) * 100).toFixed(1) : 0;
 
-                htmlUBS += `
+                htmlUnidades += `
                     <div class="p-4 bg-slate-700/50 rounded-lg">
                         <div class="flex justify-between items-start mb-2">
                             <div class="text-white font-semibold">${u.nome}</div>
@@ -1199,7 +1199,7 @@
                 `;
             });
 
-            containerUBS.innerHTML = htmlUBS || '<div class="text-center py-4 text-gray-400">Nenhuma Unidade cadastrada</div>';
+            containerUnidades.innerHTML = htmlUnidades || '<div class="text-center py-4 text-gray-400">Nenhuma Unidade cadastrada</div>';
 
             // Relatório por Status
             const containerStatus = document.getElementById('relatorioStatus');
@@ -1279,7 +1279,7 @@
                 administrador: config.administrador,
                 regiao: config.regiao,
                 resumo: {
-                    total_ubs: ubs.length,
+                    total_unidades: unidades.length,
                     total_territorios: territorios.length,
                     total_residencias: territorios.reduce((sum, t) => sum + t.estatisticas.total_residencias, 0),
                     total_visitadas: territorios.reduce((sum, t) => sum + t.estatisticas.visitadas, 0),
@@ -1287,7 +1287,7 @@
                         ((territorios.reduce((sum, t) => sum + t.estatisticas.visitadas, 0) / 
                           territorios.reduce((sum, t) => sum + t.estatisticas.total_residencias, 0)) * 100).toFixed(2) : 0
                 },
-                ubs: ubs,
+                unidades: unidades,
                 territorios: territorios
             };
 
@@ -1326,7 +1326,7 @@
                 data_backup: new Date().toISOString(),
                 versao: '1.0',
                 territorios: territorios,
-                ubs: ubs,
+                unidades: unidades,
                 config: config
             };
 
@@ -1350,7 +1350,7 @@
                 versao: '1.0',
                 tipo: 'cadastros',
                 territorios: territorios,
-                ubs: ubs
+                unidades: unidades
             };
 
             const dataStr = JSON.stringify(backup, null, 2);
@@ -1388,7 +1388,7 @@
 
                     // Restaurar dados
                     if (backup.territorios) territorios = backup.territorios;
-                    if (backup.ubs) ubs = backup.ubs;
+                    if (backup.unidades) unidades = backup.unidades;
                     if (backup.config) config = backup.config;
 
                     salvarDados();
@@ -1407,11 +1407,11 @@
             if (confirm('⚠️ ATENÇÃO! Esta ação irá excluir TODOS os dados.\n\nDeseja continuar?')) {
                 if (confirm('⚠️ Tem CERTEZA ABSOLUTA? Esta ação não pode ser desfeita!')) {
                     localStorage.removeItem('sisPorta_super_territorios');
-                    localStorage.removeItem('sisPorta_super_ubs');
+                    localStorage.removeItem('sisPorta_super_unidades');
                     localStorage.removeItem('sisPorta_super_config');
                     
                     territorios = [];
-                    ubs = [];
+                    unidades = [];
                     config = { administrador: '', regiao: '' };
                     
                     fecharModal('modalConfiguracoes');
