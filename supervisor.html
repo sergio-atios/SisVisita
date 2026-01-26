@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SisPorta - Supervisor</title>
+    <title>SisPorta - Administrador</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -179,7 +179,7 @@
                     <h1 class="text-4xl font-bold text-white flex items-center gap-2">
                         <span class="text-5xl">👨‍💼</span> SisPorta
                     </h1>
-                    <p class="text-gray-400 text-sm">Supervisor Regional</p>
+                    <p class="text-gray-400 text-sm">Administrador Regional</p>
                 </div>
                 <div class="flex gap-3">
                     <button onclick="exportarRelatorioCompleto()" class="btn-primary bg-gradient-to-r from-pink-500 to-purple-600 text-white flex items-center gap-2">
@@ -203,7 +203,7 @@
                     📍 Territórios
                 </button>
                 <button onclick="navegarPara('ubs')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
-                    🏥 UBS
+                    🏥 Unidade
                 </button>
                 <button onclick="navegarPara('relatorios')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
                     📈 Relatórios
@@ -217,7 +217,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 <div class="stat-card rounded-lg p-6 text-center">
                     <div class="text-4xl font-bold text-pink-400" id="dashTotalUBS">0</div>
-                    <div class="text-sm text-gray-400">UBS Cadastradas</div>
+                    <div class="text-sm text-gray-400">Unidade Cadastradas</div>
                 </div>
                 <div class="stat-card rounded-lg p-6 text-center">
                     <div class="text-4xl font-bold text-purple-400" id="dashTotalTerritorios">0</div>
@@ -244,7 +244,7 @@
                     <canvas id="graficoStatus"></canvas>
                 </div>
                 <div class="card-neobrutal p-6">
-                    <h3 class="text-xl font-bold text-white mb-4">📈 Progresso por UBS</h3>
+                    <h3 class="text-xl font-bold text-white mb-4">📈 Progresso por Unidade</h3>
                     <canvas id="graficoUBS"></canvas>
                 </div>
             </div>
@@ -272,7 +272,7 @@
                             Novo Território
                         </button>
                         <label class="btn-primary bg-blue-600 hover:bg-blue-700 text-white cursor-pointer flex items-center gap-2">
-                            <i data-lucide="upload" class="w-5 h-5"></i>
+                            <i data-lucide="download" class="w-5 h-5"></i>
                             Importar
                             <input type="file" id="importarTerritorio" accept=".json" style="display: none;" onchange="importarTerritorio(event)">
                         </label>
@@ -281,16 +281,16 @@
 
                 <!-- Filtros -->
                 <div class="flex gap-3 mb-4 overflow-x-auto">
-                    <button onclick="filtrarTerritorios('todos')" class="btn-filtro btn-primary bg-slate-600 text-white text-sm">
+                    <button onclick="filtrarTerritorios('todos')" class="btn-filtro btn-primary bg-slate-600 text-white text-sm ring-2 ring-white ring-offset-2 ring-offset-slate-900">
                         📋 Todos
                     </button>
-                    <button onclick="filtrarTerritorios('aguardando_designacao')" class="btn-filtro btn-primary bg-yellow-600 text-white text-sm">
+                    <button onclick="filtrarTerritorios('aguardando_designacao')" class="btn-filtro btn-primary bg-yellow-600 text-white text-sm opacity-70">
                         ⏳ Aguardando
                     </button>
-                    <button onclick="filtrarTerritorios('em_andamento')" class="btn-filtro btn-primary bg-blue-600 text-white text-sm">
+                    <button onclick="filtrarTerritorios('em_andamento')" class="btn-filtro btn-primary bg-blue-600 text-white text-sm opacity-70">
                         🔄 Em Andamento
                     </button>
-                    <button onclick="filtrarTerritorios('concluido')" class="btn-filtro btn-primary bg-green-600 text-white text-sm">
+                    <button onclick="filtrarTerritorios('concluido')" class="btn-filtro btn-primary bg-green-600 text-white text-sm opacity-70">
                         ✅ Concluídos
                     </button>
                 </div>
@@ -302,19 +302,19 @@
             </div>
         </section>
 
-        <!-- Seção: UBS -->
+        <!-- Seção: Unidade -->
         <section id="secao-ubs" class="hidden fade-in">
             <div class="card-neobrutal p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-white">🏥 Gerenciar UBS</h2>
+                    <h2 class="text-2xl font-bold text-white">🏥 Gerenciar Unidade</h2>
                     <button onclick="abrirModalNovaUBS()" class="btn-primary bg-gradient-to-r from-cyan-500 to-blue-600 text-white flex items-center gap-2">
                         <i data-lucide="plus" class="w-5 h-5"></i>
-                        Nova UBS
+                        Nova Unidade
                     </button>
                 </div>
 
                 <div id="listaUBS" class="space-y-3">
-                    <!-- UBS serão inseridas aqui -->
+                    <!-- Unidade serão inseridas aqui -->
                 </div>
             </div>
         </section>
@@ -322,9 +322,9 @@
         <!-- Seção: Relatórios -->
         <section id="secao-relatorios" class="hidden fade-in">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Relatório por UBS -->
+                <!-- Relatório por Unidade -->
                 <div class="card-neobrutal p-6">
-                    <h3 class="text-xl font-bold text-white mb-4">📊 Relatório por UBS</h3>
+                    <h3 class="text-xl font-bold text-white mb-4">📊 Relatório por Unidade</h3>
                     <div id="relatorioUBS" class="space-y-3">
                         <!-- Será preenchido dinamicamente -->
                     </div>
@@ -377,8 +377,8 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">UBS *</label>
-                            <select id="novoTerrUBS" class="input-neobrutal">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Unidade *</label>
+                            <select id="novoTerrUnidade" class="input-neobrutal">
                                 <option value="">Selecione...</option>
                             </select>
                         </div>
@@ -455,15 +455,15 @@
             </div>
         </div>
 
-        <!-- Modal: Nova UBS -->
+        <!-- Modal: Nova Unidade -->
         <div id="modalNovaUBS" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalNovaUBS')">
             <div class="card-neobrutal w-full max-w-md p-6" onclick="event.stopPropagation()">
-                <h3 class="text-2xl font-bold text-white mb-4">🏥 Adicionar UBS</h3>
+                <h3 class="text-2xl font-bold text-white mb-4">🏥 Adicionar Unidade</h3>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome da UBS *</label>
-                        <input type="text" id="novaUBSNome" class="input-neobrutal" placeholder="Ex: UBS Central">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome da Unidade *</label>
+                        <input type="text" id="novaUBSNome" class="input-neobrutal" placeholder="Ex: Unidade Central">
                     </div>
 
                     <div>
@@ -472,8 +472,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Coordenador Responsável</label>
-                        <input type="text" id="novaUBSCoordenador" class="input-neobrutal" placeholder="Nome do coordenador">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Gestor Responsável</label>
+                        <input type="text" id="novaUBSGestor" class="input-neobrutal" placeholder="Nome do gestor">
                     </div>
 
                     <div class="flex gap-3">
@@ -495,13 +495,32 @@
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Supervisor</label>
-                        <input type="text" id="configSupervisor" class="input-neobrutal" placeholder="Seu nome">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Administrador</label>
+                        <input type="text" id="configAdministrador" class="input-neobrutal" placeholder="Seu nome">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Região</label>
                         <input type="text" id="configRegiao" class="input-neobrutal" placeholder="Ex: Regional Sul">
+                    </div>
+
+                    <div class="p-4 bg-blue-900/20 border border-blue-600 rounded-lg">
+                        <h4 class="text-white font-semibold mb-3">💾 Backup e Restauração</h4>
+                        <div class="space-y-2">
+                            <button onclick="fazerBackupCompleto()" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white w-full text-sm">
+                                📦 Backup Completo
+                            </button>
+                            <button onclick="fazerBackupCadastros()" class="btn-primary bg-cyan-600 hover:bg-cyan-700 text-white w-full text-sm">
+                                📋 Backup de Cadastros
+                            </button>
+                            <label class="btn-primary bg-green-600 hover:bg-green-700 text-white w-full text-sm cursor-pointer flex items-center justify-center">
+                                📥 Restaurar Backup
+                                <input type="file" id="restaurarBackup" accept=".json" style="display: none;" onchange="restaurarBackup(event)">
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">
+                            💡 Faça backups regulares dos seus dados
+                        </p>
                     </div>
 
                     <div class="p-4 bg-red-900/20 border border-red-600 rounded-lg">
@@ -530,7 +549,7 @@
         let territorios = [];
         let ubs = [];
         let config = {
-            supervisor: '',
+            administrador: '',
             regiao: ''
         };
         let residenciasNovas = [];
@@ -653,7 +672,7 @@
                 }
             });
 
-            // Gráfico por UBS
+            // Gráfico por Unidade
             const ubsLabels = ubs.map(u => u.nome);
             const ubsData = ubs.map(u => {
                 const terrs = territorios.filter(t => t.ubs === u.nome);
@@ -713,7 +732,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <div class="text-white font-semibold">${t.nome}</div>
-                                <div class="text-sm text-gray-400">UBS: ${t.ubs} • Agente: ${t.agente || 'Não designado'}</div>
+                                <div class="text-sm text-gray-400">Unidade: ${t.ubs} • Colaborador: ${t.colaborador || 'Não designado'}</div>
                             </div>
                             <span class="text-orange-400 text-sm">⚠️ Sem atualização há 7+ dias</span>
                         </div>
@@ -738,7 +757,7 @@
             residenciasNovas = [];
             atualizarListaResidenciasNovas();
 
-            // Preencher select de UBS
+            // Preencher select de Unidade
             const select = document.getElementById('novoTerrUBS');
             select.innerHTML = '<option value="">Selecione...</option>';
             ubs.forEach(u => {
@@ -821,8 +840,10 @@
         function salvarNovoTerritorio() {
             const nome = document.getElementById('novoTerrNome').value.trim();
             const id = document.getElementById('novoTerrID').value.trim();
-            const ubsNome = document.getElementById('novoTerrUBS').value;
+            const ubsNome = document.getElementById('novoTerrUnidade').value;
             const regiao = document.getElementById('novoTerrRegiao').value.trim();
+            const modal = document.getElementById('modalNovoTerritorio');
+            const editandoId = modal.dataset.editando;
 
             if (!nome || !id || !ubsNome) {
                 alert('⚠️ Preencha todos os campos obrigatórios (*)!');
@@ -834,7 +855,38 @@
                 return;
             }
 
-            // Verificar se ID já existe
+            // Se está editando
+            if (editandoId) {
+                const territorioIndex = territorios.findIndex(t => t.territorio_id === editandoId);
+                if (territorioIndex !== -1) {
+                    const territorioAntigo = territorios[territorioIndex];
+                    
+                    // Manter informações de status e datas
+                    territorios[territorioIndex] = {
+                        ...territorioAntigo,
+                        nome: nome,
+                        ubs: ubsNome,
+                        atualizado_em: new Date().toISOString(),
+                        residencias: residenciasNovas,
+                        estatisticas: {
+                            total_residencias: residenciasNovas.length,
+                            visitadas: residenciasNovas.filter(r => r.visitado).length,
+                            pendentes: residenciasNovas.filter(r => !r.visitado).length,
+                            percentual_conclusao: (residenciasNovas.filter(r => r.visitado).length / residenciasNovas.length) * 100
+                        }
+                    };
+                    
+                    salvarDados();
+                    delete modal.dataset.editando;
+                    document.getElementById('novoTerrID').disabled = false;
+                    fecharModal('modalNovoTerritorio');
+                    atualizarTodasInterfaces();
+                    alert('✅ Território atualizado com sucesso!');
+                    return;
+                }
+            }
+
+            // Verificar se ID já existe (apenas ao criar novo)
             if (territorios.find(t => t.territorio_id === id)) {
                 alert('⚠️ Já existe um território com este ID!');
                 return;
@@ -846,8 +898,8 @@
                 territorio_id: id,
                 nome: nome,
                 ubs: ubsNome,
-                coordenador: null,
-                agente: null,
+                gestor: null,
+                colaborador: null,
                 status: 'aguardando_designacao',
                 criado_em: new Date().toISOString(),
                 atualizado_em: new Date().toISOString(),
@@ -901,6 +953,17 @@
 
         function filtrarTerritorios(filtro) {
             filtroAtual = filtro;
+            
+            // Atualizar estilo dos botões
+            document.querySelectorAll('.btn-filtro').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-slate-900');
+                btn.classList.add('opacity-70');
+            });
+            
+            // Destacar botão ativo
+            event.target.classList.remove('opacity-70');
+            event.target.classList.add('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-slate-900');
+            
             atualizarListaTerritorios();
         }
 
@@ -935,8 +998,8 @@
                         
                         <div class="text-sm text-gray-400 mb-3">
                             <div>ID: ${t.territorio_id}</div>
-                            <div>UBS: ${t.ubs}</div>
-                            ${t.agente ? `<div>Agente: ${t.agente}</div>` : ''}
+                            <div>Unidade: ${t.ubs}</div>
+                            ${t.colaborador ? `<div>Colaborador: ${t.colaborador}</div>` : ''}
                         </div>
 
                         <div class="grid grid-cols-3 gap-2 text-center text-xs mb-3">
@@ -958,9 +1021,14 @@
                             <div class="h-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-500" style="width: ${t.estatisticas.percentual_conclusao}%"></div>
                         </div>
 
-                        <button onclick="event.stopPropagation(); excluirTerritorio('${t.territorio_id}')" class="btn-primary bg-red-600 hover:bg-red-700 text-white text-sm w-full">
-                            🗑️ Excluir
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="event.stopPropagation(); editarTerritorio('${t.territorio_id}')" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm flex-1">
+                                ✏️ Editar
+                            </button>
+                            <button onclick="event.stopPropagation(); excluirTerritorio('${t.territorio_id}')" class="btn-primary bg-red-600 hover:bg-red-700 text-white text-sm flex-1">
+                                🗑️ Excluir
+                            </button>
+                        </div>
                     </div>
                 `;
             });
@@ -985,6 +1053,33 @@
             alert('✅ Território exportado!');
         }
 
+        function editarTerritorio(territorioId) {
+            const territorio = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorio) return;
+
+            // Preencher modal com dados do território
+            document.getElementById('novoTerrNome').value = territorio.nome;
+            document.getElementById('novoTerrID').value = territorio.territorio_id;
+            document.getElementById('novoTerrID').disabled = true; // ID não pode ser alterado
+            document.getElementById('novoTerrRegiao').value = territorio.residencias[0]?.regiao || '';
+            
+            // Preencher select de Unidade
+            const select = document.getElementById('novoTerrUnidade');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            ubs.forEach(u => {
+                const selected = u.nome === territorio.ubs ? 'selected' : '';
+                select.innerHTML += `<option value="${u.nome}" ${selected}>${u.nome}</option>`;
+            });
+
+            // Carregar residências existentes
+            residenciasNovas = [...territorio.residencias];
+            atualizarListaResidenciasNovas();
+
+            // Marcar como edição
+            document.getElementById('modalNovoTerritorio').dataset.editando = territorioId;
+            document.getElementById('modalNovoTerritorio').classList.remove('hidden');
+        }
+
         function excluirTerritorio(territorioId) {
             const territorio = territorios.find(t => t.territorio_id === territorioId);
             if (!territorio) return;
@@ -997,11 +1092,11 @@
             }
         }
 
-        // === UBS ===
+        // === Unidade ===
         function abrirModalNovaUBS() {
             document.getElementById('novaUBSNome').value = '';
             document.getElementById('novaUBSEndereco').value = '';
-            document.getElementById('novaUBSCoordenador').value = '';
+            document.getElementById('novaUBSGestor').value = '';
             document.getElementById('modalNovaUBS').classList.remove('hidden');
         }
 
@@ -1009,25 +1104,25 @@
             const nome = document.getElementById('novaUBSNome').value.trim();
             
             if (!nome) {
-                alert('⚠️ Informe o nome da UBS!');
+                alert('⚠️ Informe o nome da Unidade!');
                 return;
             }
 
             if (ubs.find(u => u.nome === nome)) {
-                alert('⚠️ Já existe uma UBS com este nome!');
+                alert('⚠️ Já existe uma Unidade com este nome!');
                 return;
             }
 
             ubs.push({
                 nome: nome,
                 endereco: document.getElementById('novaUBSEndereco').value.trim(),
-                coordenador: document.getElementById('novaUBSCoordenador').value.trim()
+                gestor: document.getElementById('novaUBSGestor').value.trim()
             });
 
             salvarDados();
             fecharModal('modalNovaUBS');
             atualizarListaUBS();
-            alert('✅ UBS adicionada com sucesso!');
+            alert('✅ Unidade adicionada com sucesso!');
         }
 
         function atualizarListaUBS() {
@@ -1037,7 +1132,7 @@
                 container.innerHTML = `
                     <div class="text-center py-8 text-gray-400">
                         <div class="text-4xl mb-2">🏥</div>
-                        Nenhuma UBS cadastrada
+                        Nenhuma Unidade cadastrada
                     </div>
                 `;
                 return;
@@ -1051,7 +1146,7 @@
                         <div>
                             <div class="text-white font-semibold">${u.nome}</div>
                             ${u.endereco ? `<div class="text-sm text-gray-400">${u.endereco}</div>` : ''}
-                            ${u.coordenador ? `<div class="text-sm text-gray-400">Coordenador: ${u.coordenador}</div>` : ''}
+                            ${u.gestor ? `<div class="text-sm text-gray-400">Gestor: ${u.gestor}</div>` : ''}
                             <div class="text-xs text-gray-500 mt-1">${terrs.length} território(s)</div>
                         </div>
                         <button onclick="excluirUBS('${u.nome}')" class="btn-primary bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2">
@@ -1067,7 +1162,7 @@
         function excluirUBS(nome) {
             const terrs = territorios.filter(t => t.ubs === nome);
             if (terrs.length > 0) {
-                alert('⚠️ Não é possível excluir esta UBS pois existem territórios vinculados a ela!');
+                alert('⚠️ Não é possível excluir esta Unidade pois existem territórios vinculados a ela!');
                 return;
             }
 
@@ -1075,13 +1170,13 @@
                 ubs = ubs.filter(u => u.nome !== nome);
                 salvarDados();
                 atualizarListaUBS();
-                alert('✅ UBS excluída!');
+                alert('✅ Unidade excluída!');
             }
         }
 
         // === RELATÓRIOS ===
         function atualizarRelatorios() {
-            // Relatório por UBS
+            // Relatório por Unidade
             const containerUBS = document.getElementById('relatorioUBS');
             let htmlUBS = '';
             
@@ -1104,7 +1199,7 @@
                 `;
             });
 
-            containerUBS.innerHTML = htmlUBS || '<div class="text-center py-4 text-gray-400">Nenhuma UBS cadastrada</div>';
+            containerUBS.innerHTML = htmlUBS || '<div class="text-center py-4 text-gray-400">Nenhuma Unidade cadastrada</div>';
 
             // Relatório por Status
             const containerStatus = document.getElementById('relatorioStatus');
@@ -1181,7 +1276,7 @@
         function exportarRelatorioCompleto() {
             const relatorio = {
                 data_geracao: new Date().toISOString(),
-                supervisor: config.supervisor,
+                administrador: config.administrador,
                 regiao: config.regiao,
                 resumo: {
                     total_ubs: ubs.length,
@@ -1211,18 +1306,101 @@
 
         // === CONFIGURAÇÕES ===
         function abrirModalConfiguracoes() {
-            document.getElementById('configSupervisor').value = config.supervisor || '';
+            document.getElementById('configAdministrador').value = config.administrador || '';
             document.getElementById('configRegiao').value = config.regiao || '';
             document.getElementById('modalConfiguracoes').classList.remove('hidden');
         }
 
         function salvarConfiguracoes() {
-            config.supervisor = document.getElementById('configSupervisor').value.trim();
+            config.administrador = document.getElementById('configAdministrador').value.trim();
             config.regiao = document.getElementById('configRegiao').value.trim();
             
             salvarDados();
             fecharModal('modalConfiguracoes');
             alert('✅ Configurações salvas!');
+        }
+
+        // === BACKUP E RESTAURAÇÃO ===
+        function fazerBackupCompleto() {
+            const backup = {
+                data_backup: new Date().toISOString(),
+                versao: '1.0',
+                territorios: territorios,
+                ubs: ubs,
+                config: config
+            };
+
+            const dataStr = JSON.stringify(backup, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const dataAtual = new Date().toISOString().split('T')[0];
+            link.href = url;
+            link.download = `sisporta_backup_completo_${dataAtual}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('✅ Backup completo realizado com sucesso!');
+        }
+
+        function fazerBackupCadastros() {
+            const backup = {
+                data_backup: new Date().toISOString(),
+                versao: '1.0',
+                tipo: 'cadastros',
+                territorios: territorios,
+                ubs: ubs
+            };
+
+            const dataStr = JSON.stringify(backup, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const dataAtual = new Date().toISOString().split('T')[0];
+            link.href = url;
+            link.download = `sisporta_backup_cadastros_${dataAtual}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('✅ Backup de cadastros realizado com sucesso!');
+        }
+
+        function restaurarBackup(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            if (!confirm('⚠️ ATENÇÃO!\n\nRestaurar backup irá SUBSTITUIR todos os dados atuais.\n\nDeseja continuar?')) {
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    if (!backup.versao || !backup.data_backup) {
+                        alert('❌ Arquivo de backup inválido!');
+                        return;
+                    }
+
+                    // Restaurar dados
+                    if (backup.territorios) territorios = backup.territorios;
+                    if (backup.ubs) ubs = backup.ubs;
+                    if (backup.config) config = backup.config;
+
+                    salvarDados();
+                    atualizarTodasInterfaces();
+                    
+                    alert(`✅ Backup restaurado com sucesso!\n\nData do backup: ${new Date(backup.data_backup).toLocaleString('pt-BR')}`);
+                } catch (error) {
+                    alert('❌ Erro ao restaurar backup: ' + error.message);
+                }
+            };
+            reader.readAsText(arquivo);
+            event.target.value = '';
         }
 
         function limparTodosDados() {
@@ -1234,7 +1412,7 @@
                     
                     territorios = [];
                     ubs = [];
-                    config = { supervisor: '', regiao: '' };
+                    config = { administrador: '', regiao: '' };
                     
                     fecharModal('modalConfiguracoes');
                     atualizarTodasInterfaces();
