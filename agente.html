@@ -543,7 +543,7 @@
 
         function atualizarInfoTerritorio() {
             document.getElementById('territorioNome').textContent = territorioAtual.nome;
-            document.getElementById('territorioUBS').textContent = territorioAtual.ubs || '-';
+            document.getElementById('territorioUBS').textContent = territorioAtual.unidade || '-';
             document.getElementById('territorioID').textContent = territorioAtual.territorio_id;
 
             const stats = territorioAtual.estatisticas;
