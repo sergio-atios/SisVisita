@@ -632,7 +632,7 @@
                     }
 
                     dados.status = 'aguardando_designacao';
-                    dados.ubs = config.ubs || dados.ubs;
+                    dados.unidade = config.unidade || dados.unidade;
                     territorios.push(dados);
                     
                     salvarDados();
@@ -733,7 +733,7 @@
             territorioAtual.colaborador = colaboradorNome;
             territorioAtual.status = 'em_andamento';
             territorioAtual.gestor = config.gestor;
-            territorioAtual.ubs = config.ubs;
+            territorioAtual.unidade = config.unidade;
 
             salvarDados();
             
@@ -1046,13 +1046,13 @@
 
         // === CONFIGURAÇÕES ===
         function abrirModalConfiguracoes() {
-            document.getElementById('configUnidade').value = config.ubs || '';
+            document.getElementById('configUnidade').value = config.unidade || '';
             document.getElementById('configGestor').value = config.gestor || '';
             document.getElementById('modalConfiguracoes').classList.remove('hidden');
         }
 
         function salvarConfiguracoes() {
-            config.ubs = document.getElementById('configUnidade').value.trim();
+            config.unidade = document.getElementById('configUnidade').value.trim();
             config.gestor = document.getElementById('configGestor').value.trim();
             
             salvarDados();
