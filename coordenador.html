@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Versionamento e Cache Control -->
+    <meta name="version" content="1.3.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>SisVisita - Gestor</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f97316">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SisVisita Gestor">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn {
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .territorio-item {
+            transition: all 0.2s;
+        }
+
+        .territorio-item:hover {
+            transform: translateX(5px);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">👥 SisVisita</h1>
+            <p class="text-gray-400">Gestor</p>
+        </div>
+
+        <!-- Seção Inicial: Sem Territórios -->
+        <section id="sem-territorios" class="card p-8 text-center">
+            <div class="text-6xl mb-4">📦</div>
+            <h2 class="text-2xl font-bold mb-3">Nenhum Território Carregado</h2>
+            <p class="text-gray-400 mb-6">Importe os territórios fornecidos pelo administrador</p>
+            
+            <label class="btn bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
+                <i data-lucide="download" class="w-5 h-5"></i>
+                Importar Territórios
+                <input type="file" id="importarTerritorios" accept=".json" style="display: none;" onchange="importarTerritorios(event)">
+            </label>
+        </section>
+
+        <!-- Seção Principal: Lista de Territórios -->
+        <section id="lista-territorios" class="hidden">
+            
+            <!-- Ações Rápidas -->
+            <div class="card p-6 mb-6">
+                <div class="flex flex-wrap gap-3">
+                    <label class="btn bg-blue-600 hover:bg-blue-700 text-white cursor-pointer flex-1">
+                        <i data-lucide="download" class="w-5 h-5"></i>
+                        Importar Territórios
+                        <input type="file" id="importarTerritorios2" accept=".json" style="display: none;" onchange="importarTerritorios(event)">
+                    </label>
+                    
+                    <label class="btn bg-green-600 hover:bg-green-700 text-white cursor-pointer flex-1">
+                        <i data-lucide="upload" class="w-5 h-5"></i>
+                        Importar Devolução
+                        <input type="file" id="importarDevolucao" accept=".json" style="display: none;" onchange="importarDevolucao(event)">
+                    </label>
+                    
+                    <button onclick="gerarRelatorio()" class="btn bg-purple-600 hover:bg-purple-700 text-white flex-1">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                        Gerar Relatório
+                    </button>
+                </div>
+            </div>
+
+            <!-- Estatísticas Simples -->
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="card p-4 text-center">
+                    <div class="text-3xl font-bold text-blue-400" id="statTotal">0</div>
+                    <div class="text-sm text-gray-400">Total</div>
+                </div>
+                <div class="card p-4 text-center">
+                    <div class="text-3xl font-bold text-yellow-400" id="statEmUso">0</div>
+                    <div class="text-sm text-gray-400">Em Uso</div>
+                </div>
+                <div class="card p-4 text-center">
+                    <div class="text-3xl font-bold text-green-400" id="statDisponiveis">0</div>
+                    <div class="text-sm text-gray-400">Disponíveis</div>
+                </div>
+            </div>
+
+            <!-- Lista de Territórios -->
+            <div class="card p-6">
+                <h2 class="text-xl font-bold mb-4">📍 Territórios</h2>
+                <div id="territoriosLista" class="space-y-3">
+                    <!-- Territórios serão inseridos aqui -->
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Modal: Registrar Designação -->
+    <div id="modalDesignacao" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalDesignacao')">
+        <div class="card w-full max-w-md p-6" onclick="event.stopPropagation()">
+            <h3 class="text-2xl font-bold mb-4">📝 Registrar Designação</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Território</label>
+                    <input type="text" id="designacaoTerritorio" class="w-full bg-slate-700 text-white rounded-lg p-3 border border-slate-600" readonly>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Nome do Executor *</label>
+                    <input type="text" id="designacaoExecutor" class="w-full bg-slate-700 text-white rounded-lg p-3 border border-slate-600 focus:border-blue-500 focus:outline-none" placeholder="Ex: José Carlos">
+                </div>
+
+                <div class="p-4 bg-blue-900/20 border border-blue-600 rounded-lg">
+                    <p class="text-sm text-gray-300">
+                        💡 <strong>Dica:</strong> Anote quem pegou qual território. O administrador receberá esta informação quando você enviar o relatório.
+                    </p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="salvarDesignacao()" class="btn bg-green-600 hover:bg-green-700 text-white flex-1">
+                        Salvar
+                    </button>
+                    <button onclick="fecharModal('modalDesignacao')" class="btn bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === VARIÁVEIS GLOBAIS ===
+        let territorios = [];
+        let territorioDesignando = null;
+
+        // === INICIALIZAÇÃO ===
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            
+            // Registrar Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(() => console.log('Service Worker registrado'))
+                    .catch(err => console.log('Service Worker falhou:', err));
+            }
+            
+            carregarDados();
+            atualizarInterface();
+        });
+
+        // === GESTÃO DE DADOS ===
+        function carregarDados() {
+            const dadosSalvos = localStorage.getItem('sisVisita_gestor_territorios');
+            if (dadosSalvos) {
+                territorios = JSON.parse(dadosSalvos);
+            }
+        }
+
+        function salvarDados() {
+            localStorage.setItem('sisVisita_gestor_territorios', JSON.stringify(territorios));
+        }
+
+        function atualizarInterface() {
+            const semTerritorios = document.getElementById('sem-territorios');
+            const listaTerritorios = document.getElementById('lista-territorios');
+
+            if (!territorios || territorios.length === 0) {
+                semTerritorios.classList.remove('hidden');
+                listaTerritorios.classList.add('hidden');
+            } else {
+                semTerritorios.classList.add('hidden');
+                listaTerritorios.classList.remove('hidden');
+                atualizarEstatisticas();
+                renderizarTerritorios();
+            }
+
+            lucide.createIcons();
+        }
+
+        // === IMPORTAR ===
+        function importarTerritorios(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const dados = JSON.parse(e.target.result);
+                    
+                    if (dados.tipo === 'pacote_territorios') {
+                        // Importar todos os territórios do pacote
+                        territorios = dados.territorios.map(t => ({
+                            ...t,
+                            executor_designado: null,
+                            status_gestor: 'disponivel'
+                        }));
+                        salvarDados();
+                        atualizarInterface();
+                        alert(`✅ ${territorios.length} território(s) importado(s) com sucesso!`);
+                    } else if (dados.tipo === 'territorio') {
+                        // Importar território individual
+                        const existe = territorios.find(t => t.territorio_id === dados.territorio_id);
+                        if (existe) {
+                            if (confirm(`Território "${dados.nome}" já existe. Deseja substituir?`)) {
+                                territorios = territorios.map(t => 
+                                    t.territorio_id === dados.territorio_id ? {...dados, executor_designado: null, status_gestor: 'disponivel'} : t
+                                );
+                            }
+                        } else {
+                            territorios.push({...dados, executor_designado: null, status_gestor: 'disponivel'});
+                        }
+                        salvarDados();
+                        atualizarInterface();
+                        alert('✅ Território importado com sucesso!');
+                    } else {
+                        alert('❌ Arquivo inválido!');
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao ler arquivo: ' + error.message);
+                }
+            };
+            reader.readAsText(arquivo);
+            event.target.value = '';
+        }
+
+        function importarDevolucao(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const devolucao = JSON.parse(e.target.result);
+                    
+                    if (devolucao.tipo !== 'devolucao') {
+                        alert('❌ Arquivo inválido! Selecione um arquivo de devolução.');
+                        return;
+                    }
+
+                    // Atualizar território com dados da devolução
+                    const index = territorios.findIndex(t => t.territorio_id === devolucao.territorio_id);
+                    if (index !== -1) {
+                        territorios[index] = {
+                            ...devolucao.territorio,
+                            executor_designado: devolucao.executor,
+                            status_gestor: 'devolvido',
+                            data_devolucao: devolucao.data_devolucao
+                        };
+                        salvarDados();
+                        atualizarInterface();
+                        alert(`✅ Devolução recebida!\n\nTerritório: ${devolucao.territorio.nome}\nExecutor: ${devolucao.executor}\nConclusão: ${devolucao.territorio.estatisticas.percentual_conclusao.toFixed(0)}%`);
+                    } else {
+                        alert('❌ Território não encontrado na sua lista!');
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao processar devolução: ' + error.message);
+                }
+            };
+            reader.readAsText(arquivo);
+            event.target.value = '';
+        }
+
+        // === ESTATÍSTICAS ===
+        function atualizarEstatisticas() {
+            const total = territorios.length;
+            const emUso = territorios.filter(t => t.executor_designado && t.status_gestor !== 'devolvido').length;
+            const disponiveis = territorios.filter(t => !t.executor_designado || t.status_gestor === 'devolvido').length;
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statEmUso').textContent = emUso;
+            document.getElementById('statDisponiveis').textContent = disponiveis;
+        }
+
+        // === RENDERIZAR ===
+        function renderizarTerritorios() {
+            const container = document.getElementById('territoriosLista');
+            
+            if (territorios.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-8">Nenhum território disponível</div>';
+                return;
+            }
+
+            let html = '';
+            territorios.forEach(territorio => {
+                const temExecutor = territorio.executor_designado && territorio.status_gestor !== 'devolvido';
+                const foiDevolvido = territorio.status_gestor === 'devolvido';
+                
+                let statusBadge = '';
+                if (foiDevolvido) {
+                    statusBadge = '<span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-semibold">✅ Devolvido</span>';
+                } else if (temExecutor) {
+                    statusBadge = '<span class="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-semibold">🔄 Em Uso</span>';
+                } else {
+                    statusBadge = '<span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-semibold">📍 Disponível</span>';
+                }
+
+                html += `
+                    <div class="territorio-item bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-white">${territorio.nome}</h3>
+                                <p class="text-sm text-gray-400">${territorio.territorio_id} • ${territorio.residencias.length} residências</p>
+                            </div>
+                            ${statusBadge}
+                        </div>
+
+                        ${temExecutor ? `
+                            <div class="text-sm text-gray-300 mb-2">
+                                👤 <strong>${territorio.executor_designado}</strong>
+                            </div>
+                        ` : ''}
+
+                        ${foiDevolvido ? `
+                            <div class="mb-3">
+                                <div class="text-xs text-gray-400 mb-1">
+                                    Progresso: ${territorio.estatisticas.percentual_conclusao.toFixed(0)}% 
+                                    (${territorio.estatisticas.visitadas}/${territorio.estatisticas.total_residencias})
+                                </div>
+                                <div class="bg-slate-600 rounded-full h-2">
+                                    <div class="h-2 rounded-full bg-green-500" style="width: ${territorio.estatisticas.percentual_conclusao}%"></div>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="flex gap-2">
+                            ${!temExecutor || foiDevolvido ? `
+                                <button onclick="abrirDesignacao('${territorio.territorio_id}')" class="btn bg-blue-600 hover:bg-blue-700 text-white text-sm flex-1">
+                                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                                    ${foiDevolvido ? 'Redesignar' : 'Designar'}
+                                </button>
+                            ` : ''}
+                            
+                            ${foiDevolvido ? `
+                                <button onclick="exportarTerritorio('${territorio.territorio_id}')" class="btn bg-purple-600 hover:bg-purple-700 text-white text-sm flex-1">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                    Exportar
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // === DESIGNAÇÃO ===
+        function abrirDesignacao(territorioId) {
+            territorioDesignando = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorioDesignando) return;
+
+            document.getElementById('designacaoTerritorio').value = `${territorioDesignando.nome} (${territorioDesignando.territorio_id})`;
+            document.getElementById('designacaoExecutor').value = territorioDesignando.executor_designado || '';
+            document.getElementById('modalDesignacao').classList.remove('hidden');
+        }
+
+        function salvarDesignacao() {
+            const executor = document.getElementById('designacaoExecutor').value.trim();
+            
+            if (!executor) {
+                alert('⚠️ Digite o nome do executor!');
+                return;
+            }
+
+            territorioDesignando.executor_designado = executor;
+            territorioDesignando.status_gestor = 'designado';
+            territorioDesignando.data_designacao = new Date().toISOString();
+            
+            salvarDados();
+            fecharModal('modalDesignacao');
+            atualizarInterface();
+            alert(`✅ Território designado para ${executor}!`);
+        }
+
+        // === RELATÓRIO ===
+        function gerarRelatorio() {
+            const relatorio = {
+                tipo: 'relatorio_gestor',
+                versao: '1.0',
+                data: new Date().toISOString(),
+                designacoes: territorios
+                    .filter(t => t.executor_designado)
+                    .map(t => ({
+                        territorio_id: t.territorio_id,
+                        nome: t.nome,
+                        executor: t.executor_designado,
+                        status: t.status_gestor,
+                        data_designacao: t.data_designacao,
+                        data_devolucao: t.data_devolucao,
+                        estatisticas: t.estatisticas
+                    }))
+            };
+
+            const dataStr = JSON.stringify(relatorio, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = `relatorio_gestor_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('✅ Relatório gerado!\n\n📱 Envie o arquivo para o administrador.');
+        }
+
+        function exportarTerritorio(territorioId) {
+            const territorio = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorio) return;
+
+            const dataStr = JSON.stringify(territorio, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = `territorio_${territorio.territorio_id}_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('✅ Território exportado!');
+        }
+
+        // === UTILIDADES ===
+        function fecharModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
