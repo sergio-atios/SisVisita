@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="version" content="1.4.0">
+    <title>SisVisita - Administrador</title>
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ec4899">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- CSS/JS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { 
+            font-family: system-ui; 
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); 
+            min-height: 100vh;
+        }
+        .card { 
+            background: rgba(30,41,59,0.8); 
+            border-radius: 1rem; 
+            padding: 1.5rem; 
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn { 
+            padding: 0.75rem 1.5rem; 
+            border-radius: 0.5rem; 
+            font-weight: 600; 
+            transition: 0.2s; 
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn:active { transform: scale(0.98); }
+        .nav-btn { 
+            padding: 0.5rem 1rem; 
+            transition: 0.3s; 
+            border-bottom: 3px solid transparent;
+        }
+        .nav-btn.active { 
+            color: #ec4899 !important; 
+            border-bottom-color: #ec4899; 
+        }
+        .input { 
+            width: 100%; 
+            background: #1e293b; 
+            color: white; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 0.5rem; 
+            padding: 0.75rem; 
+        }
+        .input:focus { 
+            outline: none; 
+            border-color: #ec4899; 
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="text-white p-4">
+    
+    <!-- Header -->
+    <header class="card mb-6">
+        <h1 class="text-3xl font-bold">🎯 SisVisita - Administrador</h1>
+        <p class="text-gray-400">Versão 1.4.0</p>
+    </header>
+
+    <!-- Navegação -->
+    <nav class="card mb-6">
+        <div class="flex gap-4 overflow-x-auto">
+            <button onclick="navegarPara('dashboard')" class="nav-btn active text-gray-300">
+                📊 Dashboard
+            </button>
+            <button onclick="navegarPara('territorios')" class="nav-btn text-gray-400">
+                📍 Territórios
+            </button>
+            <button onclick="navegarPara('unidades')" class="nav-btn text-gray-400">
+                🏢 Unidades
+            </button>
+        </div>
+    </nav>
+
+    <!-- Seção: Dashboard -->
+    <section id="secao-dashboard">
+        <div class="card">
+            <h2 class="text-2xl font-bold mb-4">Dashboard</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-blue-900/30 p-4 rounded-lg">
+                    <div class="text-3xl font-bold" id="totalTerritorios">0</div>
+                    <div class="text-sm text-gray-400">Total Territórios</div>
+                </div>
+                <div class="bg-green-900/30 p-4 rounded-lg">
+                    <div class="text-3xl font-bold" id="totalUnidades">0</div>
+                    <div class="text-sm text-gray-400">Total Unidades</div>
+                </div>
+                <div class="bg-purple-900/30 p-4 rounded-lg">
+                    <div class="text-3xl font-bold" id="totalResidencias">0</div>
+                    <div class="text-sm text-gray-400">Total Residências</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção: Territórios -->
+    <section id="secao-territorios" class="hidden">
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Territórios</h2>
+                <div class="flex gap-2">
+                    <button onclick="abrirModalTerritorio()" class="btn bg-green-600 hover:bg-green-700">
+                        <i data-lucide="plus"></i> Novo
+                    </button>
+                    <button onclick="gerarPacote()" class="btn bg-blue-600 hover:bg-blue-700">
+                        <i data-lucide="package"></i> Gerar Pacote
+                    </button>
+                </div>
+            </div>
+            <div id="listaTerritorios" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+    </section>
+
+    <!-- Seção: Unidades -->
+    <section id="secao-unidades" class="hidden">
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Unidades</h2>
+                <button onclick="abrirModalUnidade()" class="btn bg-green-600 hover:bg-green-700">
+                    <i data-lucide="plus"></i> Nova Unidade
+                </button>
+            </div>
+            <div id="listaUnidades" class="grid gap-4"></div>
+        </div>
+    </section>
+
+    <!-- Modal: Território -->
+    <div id="modalTerritorio" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50" onclick="fecharModal('modalTerritorio')">
+        <div class="card max-w-2xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <h3 class="text-2xl font-bold mb-4">Território</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block mb-2 text-sm font-medium">Nome *</label>
+                    <input type="text" id="terrNome" class="input" placeholder="Ex: Centro - Quadra 1">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-medium">ID *</label>
+                    <input type="text" id="terrID" class="input" placeholder="Ex: T001">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-medium">Unidade</label>
+                    <select id="terrUnidade" class="input">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="flex gap-2 pt-4">
+                    <button onclick="salvarTerritorio()" class="btn bg-green-600 hover:bg-green-700 flex-1">
+                        <i data-lucide="save"></i> Salvar
+                    </button>
+                    <button onclick="fecharModal('modalTerritorio')" class="btn bg-gray-600 hover:bg-gray-700 flex-1">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Unidade -->
+    <div id="modalUnidade" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50" onclick="fecharModal('modalUnidade')">
+        <div class="card max-w-lg w-full" onclick="event.stopPropagation()">
+            <h3 class="text-2xl font-bold mb-4">Unidade</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block mb-2 text-sm font-medium">Nome *</label>
+                    <input type="text" id="unidNome" class="input" placeholder="Ex: Unidade Norte">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-medium">Endereço</label>
+                    <input type="text" id="unidEndereco" class="input" placeholder="Ex: Rua A, 100">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-medium">Gestor</label>
+                    <input type="text" id="unidGestor" class="input" placeholder="Ex: José Silva">
+                </div>
+                <div class="flex gap-2 pt-4">
+                    <button onclick="salvarUnidade()" class="btn bg-green-600 hover:bg-green-700 flex-1">
+                        <i data-lucide="save"></i> Salvar
+                    </button>
+                    <button onclick="fecharModal('modalUnidade')" class="btn bg-gray-600 hover:bg-gray-700 flex-1">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // VARIÁVEIS GLOBAIS
+        // ========================================
+        let territorios = [];
+        let unidades = [];
+        let config = { administrador: '', regiao: '' };
+
+        // ========================================
+        // ARMAZENAMENTO LOCAL
+        // ========================================
+        
+        // Salvar dados no localStorage
+        function salvarDados() {
+            try {
+                localStorage.setItem('sisVisita_territorios', JSON.stringify(territorios));
+                localStorage.setItem('sisVisita_unidades', JSON.stringify(unidades));
+                localStorage.setItem('sisVisita_config', JSON.stringify(config));
+            } catch (e) {
+                console.error('Erro ao salvar:', e);
+                alert('⚠️ Erro ao salvar dados!');
+            }
+        }
+
+        // Carregar dados do localStorage
+        function carregarDados() {
+            try {
+                const terrData = localStorage.getItem('sisVisita_territorios');
+                const unidData = localStorage.getItem('sisVisita_unidades');
+                const confData = localStorage.getItem('sisVisita_config');
+                
+                if (terrData) territorios = JSON.parse(terrData);
+                if (unidData) unidades = JSON.parse(unidData);
+                if (confData) config = JSON.parse(confData);
+            } catch (e) {
+                console.error('Erro ao carregar:', e);
+            }
+        }
+
+        // ========================================
+        // NAVEGAÇÃO
+        // ========================================
+        
+        function navegarPara(secao) {
+            // Esconder todas as seções
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            
+            // Mostrar seção selecionada
+            const secaoEl = document.getElementById('secao-' + secao);
+            if (secaoEl) {
+                secaoEl.classList.remove('hidden');
+            }
+            
+            // Atualizar botões de navegação
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-gray-400');
+            });
+            
+            // Marcar botão ativo
+            if (event && event.target) {
+                event.target.classList.add('active');
+                event.target.classList.remove('text-gray-400');
+            }
+            
+            // Atualizar conteúdo
+            if (secao === 'dashboard') atualizarDashboard();
+            if (secao === 'territorios') renderTerritorios();
+            if (secao === 'unidades') renderUnidades();
+        }
+
+        // ========================================
+        // DASHBOARD
+        // ========================================
+        
+        function atualizarDashboard() {
+            document.getElementById('totalTerritorios').textContent = territorios.length;
+            document.getElementById('totalUnidades').textContent = unidades.length;
+            
+            const totalRes = territorios.reduce((sum, t) => 
+                sum + (t.residencias?.length || 0), 0);
+            document.getElementById('totalResidencias').textContent = totalRes;
+        }
+
+        // ========================================
+        // TERRITÓRIOS
+        // ========================================
+        
+        function renderTerritorios() {
+            const container = document.getElementById('listaTerritorios');
+            
+            if (territorios.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center text-gray-400 py-8">
+                        <i data-lucide="map-pin-off" class="w-16 h-16 mx-auto mb-2 opacity-50"></i>
+                        <p>Nenhum território cadastrado</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+            
+            container.innerHTML = territorios.map(t => `
+                <div class="bg-slate-700/50 p-4 rounded-lg border border-slate-600 hover:border-slate-500 transition">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-lg">${t.nome}</h3>
+                            <div class="text-sm text-gray-400">ID: ${t.territorio_id}</div>
+                            <div class="text-sm text-gray-400">
+                                Unidade: ${t.unidades || '<span class="text-yellow-400">Não definida</span>'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button onclick="editarTerritorio('${t.territorio_id}')" class="btn bg-blue-600 hover:bg-blue-700 text-sm flex-1">
+                            <i data-lucide="edit" class="w-4 h-4"></i> Editar
+                        </button>
+                        <button onclick="excluirTerritorio('${t.territorio_id}')" class="btn bg-red-600 hover:bg-red-700 text-sm flex-1">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        function abrirModalTerritorio() {
+            // Limpar campos
+            document.getElementById('terrNome').value = '';
+            document.getElementById('terrID').value = '';
+            document.getElementById('terrID').disabled = false;
+            
+            // Preencher select de unidades
+            const select = document.getElementById('terrUnidade');
+            select.innerHTML = '<option value="">Selecione...</option>' + 
+                unidades.map(u => `<option value="${u.nome}">${u.nome}</option>`).join('');
+            
+            // Abrir modal
+            document.getElementById('modalTerritorio').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function salvarTerritorio() {
+            const nome = document.getElementById('terrNome').value.trim();
+            const id = document.getElementById('terrID').value.trim();
+            const unidade = document.getElementById('terrUnidade').value;
+            
+            if (!nome || !id) {
+                alert('⚠️ Preencha nome e ID!');
+                return;
+            }
+            
+            // Verificar se já existe (ao criar novo)
+            if (!document.getElementById('terrID').disabled) {
+                if (territorios.find(t => t.territorio_id === id)) {
+                    alert('⚠️ Já existe um território com este ID!');
+                    return;
+                }
+                
+                // Criar novo
+                territorios.push({
+                    territorio_id: id,
+                    nome: nome,
+                    unidades: unidade,
+                    residencias: [],
+                    status: 'disponivel',
+                    estatisticas: {
+                        total_residencias: 0,
+                        visitadas: 0,
+                        pendentes: 0,
+                        percentual_conclusao: 0
+                    }
+                });
+            } else {
+                // Editar existente
+                const index = territorios.findIndex(t => t.territorio_id === id);
+                if (index !== -1) {
+                    territorios[index].nome = nome;
+                    territorios[index].unidades = unidade;
+                }
+            }
+            
+            salvarDados();
+            fecharModal('modalTerritorio');
+            renderTerritorios();
+            alert('✅ Território salvo com sucesso!');
+        }
+
+        function editarTerritorio(id) {
+            const t = territorios.find(terr => terr.territorio_id === id);
+            if (!t) return;
+            
+            document.getElementById('terrNome').value = t.nome;
+            document.getElementById('terrID').value = t.territorio_id;
+            document.getElementById('terrID').disabled = true;
+            
+            const select = document.getElementById('terrUnidade');
+            select.innerHTML = '<option value="">Selecione...</option>' + 
+                unidades.map(u => `<option value="${u.nome}" ${u.nome === t.unidades ? 'selected' : ''}>${u.nome}</option>`).join('');
+            
+            document.getElementById('modalTerritorio').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function excluirTerritorio(id) {
+            if (!confirm('❌ Tem certeza que deseja excluir este território?')) return;
+            
+            territorios = territorios.filter(t => t.territorio_id !== id);
+            salvarDados();
+            renderTerritorios();
+            alert('✅ Território excluído!');
+        }
+
+        // ========================================
+        // UNIDADES
+        // ========================================
+        
+        function renderUnidades() {
+            const container = document.getElementById('listaUnidades');
+            
+            if (unidades.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-400 py-8">
+                        <i data-lucide="building-2" class="w-16 h-16 mx-auto mb-2 opacity-50"></i>
+                        <p>Nenhuma unidade cadastrada</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+            
+            container.innerHTML = unidades.map(u => `
+                <div class="bg-slate-700/50 p-4 rounded-lg border border-slate-600 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-lg">${u.nome}</h3>
+                        ${u.endereco ? `<div class="text-sm text-gray-400">${u.endereco}</div>` : ''}
+                        ${u.gestor ? `<div class="text-sm text-gray-400">Gestor: ${u.gestor}</div>` : ''}
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editarUnidade('${u.nome}')" class="btn bg-blue-600 hover:bg-blue-700">
+                            <i data-lucide="edit" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="excluirUnidade('${u.nome}')" class="btn bg-red-600 hover:bg-red-700">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        function abrirModalUnidade() {
+            document.getElementById('unidNome').value = '';
+            document.getElementById('unidNome').disabled = false;
+            document.getElementById('unidEndereco').value = '';
+            document.getElementById('unidGestor').value = '';
+            document.getElementById('modalUnidade').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function salvarUnidade() {
+            const nome = document.getElementById('unidNome').value.trim();
+            const endereco = document.getElementById('unidEndereco').value.trim();
+            const gestor = document.getElementById('unidGestor').value.trim();
+            
+            if (!nome) {
+                alert('⚠️ Informe o nome da unidade!');
+                return;
+            }
+            
+            if (!document.getElementById('unidNome').disabled) {
+                // Verificar duplicata
+                if (unidades.find(u => u.nome === nome)) {
+                    alert('⚠️ Já existe uma unidade com este nome!');
+                    return;
+                }
+                
+                // Criar nova
+                unidades.push({ nome, endereco, gestor });
+            } else {
+                // Editar existente (não implementado completamente)
+                const index = unidades.findIndex(u => u.nome === nome);
+                if (index !== -1) {
+                    unidades[index].endereco = endereco;
+                    unidades[index].gestor = gestor;
+                }
+            }
+            
+            salvarDados();
+            fecharModal('modalUnidade');
+            renderUnidades();
+            alert('✅ Unidade salva com sucesso!');
+        }
+
+        function editarUnidade(nome) {
+            const u = unidades.find(un => un.nome === nome);
+            if (!u) return;
+            
+            document.getElementById('unidNome').value = u.nome;
+            document.getElementById('unidNome').disabled = true;
+            document.getElementById('unidEndereco').value = u.endereco || '';
+            document.getElementById('unidGestor').value = u.gestor || '';
+            document.getElementById('modalUnidade').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function excluirUnidade(nome) {
+            if (!confirm('❌ Tem certeza que deseja excluir esta unidade?')) return;
+            
+            unidades = unidades.filter(u => u.nome !== nome);
+            salvarDados();
+            renderUnidades();
+            alert('✅ Unidade excluída!');
+        }
+
+        // ========================================
+        // GERAR PACOTE
+        // ========================================
+        
+        function gerarPacote() {
+            if (territorios.length === 0) {
+                alert('⚠️ Não há territórios cadastrados para gerar o pacote!');
+                return;
+            }
+            
+            const pacote = {
+                tipo: 'pacote_territorios',
+                versao: '1.0',
+                congregacao: config.administrador || 'Congregação',
+                data_geracao: new Date().toISOString(),
+                territorios: territorios.map(t => ({
+                    ...t,
+                    status_local: 'disponivel',
+                    executor_atual: null
+                }))
+            };
+            
+            const dataStr = JSON.stringify(pacote, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const dataAtual = new Date().toISOString().split('T')[0];
+            link.href = url;
+            link.download = `pacote_territorios_${dataAtual}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert(`✅ Pacote gerado com sucesso!\n\n📦 ${territorios.length} território(s) incluído(s).`);
+        }
+
+        // ========================================
+        // UTILITÁRIOS
+        // ========================================
+        
+        function fecharModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // ========================================
+        // DETECÇÃO DE ATUALIZAÇÃO
+        // ========================================
+        
+        // Registrar service worker e detectar atualizações
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(registration => {
+                    console.log('[App] Service Worker registrado');
+                    
+                    // Detectar atualizações
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Nova versão disponível
+                                if (confirm('🔄 Nova versão disponível!\n\nDeseja atualizar agora?')) {
+                                    newWorker.postMessage({ action: 'skipWaiting' });
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    });
+                })
+                .catch(err => console.error('[App] Erro ao registrar SW:', err));
+            
+            // Escutar mensagens do service worker
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data.type === 'CACHE_UPDATED') {
+                    console.log('[App] Cache atualizado:', event.data.version);
+                }
+            });
+            
+            // Recarregar quando service worker assumir controle
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    console.log('[App] Nova versão ativada, recarregando...');
+                    window.location.reload();
+                }
+            });
+        }
+
+        // ========================================
+        // INICIALIZAÇÃO
+        // ========================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ SisVisita Administrador v1.4.0 carregado');
+            carregarDados();
+            atualizarDashboard();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

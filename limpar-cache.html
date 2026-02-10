@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpar Cache - SisVisita</title>
+    <style>
+        body {
+            font-family: system-ui;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(30,41,59,0.9);
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            text-align: center;
+        }
+        button {
+            background: #ec4899;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #db2777;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔄 Limpar Cache</h1>
+        <p>Se o SisVisita não está atualizando, use este utilitário para forçar a atualização.</p>
+        
+        <div style="margin: 2rem 0;">
+            <button onclick="limparTudo()">🗑️ Limpar TUDO</button>
+            <button onclick="limparCache()">🔄 Limpar apenas Cache</button>
+            <button onclick="limparServiceWorker()">⚙️ Limpar Service Worker</button>
+        </div>
+        
+        <div id="status" class="status">
+            Aguardando ação...
+        </div>
+    </div>
+
+    <script>
+        const status = document.getElementById('status');
+
+        async function limparTudo() {
+            status.innerHTML = '🔄 Limpando tudo...';
+            
+            try {
+                // 1. Limpar localStorage
+                localStorage.clear();
+                status.innerHTML += '<br>✅ localStorage limpo';
+                
+                // 2. Limpar todos os caches
+                const cacheNames = await caches.keys();
+                for (const name of cacheNames) {
+                    await caches.delete(name);
+                    status.innerHTML += `<br>✅ Cache deletado: ${name}`;
+                }
+                
+                // 3. Desregistrar service workers
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (const registration of registrations) {
+                    await registration.unregister();
+                    status.innerHTML += '<br>✅ Service Worker desregistrado';
+                }
+                
+                status.innerHTML += '<br><br><strong>✅ TUDO LIMPO!</strong>';
+                status.innerHTML += '<br><br>⏳ Recarregando em 3 segundos...';
+                
+                setTimeout(() => {
+                    window.location.href = './index.html';
+                }, 3000);
+                
+            } catch (error) {
+                status.innerHTML += `<br>❌ Erro: ${error.message}`;
+            }
+        }
+
+        async function limparCache() {
+            status.innerHTML = '🔄 Limpando cache...';
+            
+            try {
+                const cacheNames = await caches.keys();
+                for (const name of cacheNames) {
+                    await caches.delete(name);
+                    status.innerHTML += `<br>✅ Deletado: ${name}`;
+                }
+                
+                status.innerHTML += '<br><br>✅ Cache limpo!';
+                status.innerHTML += '<br>⏳ Recarregando...';
+                
+                setTimeout(() => window.location.reload(), 2000);
+                
+            } catch (error) {
+                status.innerHTML += `<br>❌ Erro: ${error.message}`;
+            }
+        }
+
+        async function limparServiceWorker() {
+            status.innerHTML = '🔄 Desregistrando Service Workers...';
+            
+            try {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                
+                if (registrations.length === 0) {
+                    status.innerHTML = '⚠️ Nenhum Service Worker registrado';
+                    return;
+                }
+                
+                for (const registration of registrations) {
+                    await registration.unregister();
+                    status.innerHTML += '<br>✅ Service Worker removido';
+                }
+                
+                status.innerHTML += '<br><br>✅ Concluído!';
+                status.innerHTML += '<br>⏳ Recarregando...';
+                
+                setTimeout(() => window.location.reload(), 2000);
+                
+            } catch (error) {
+                status.innerHTML += `<br>❌ Erro: ${error.message}`;
+            }
+        }
+
+        // Mostrar informações ao carregar
+        window.addEventListener('load', async () => {
+            let info = 'ℹ️ Informações:<br>';
+            
+            // Caches
+            const cacheNames = await caches.keys();
+            info += `<br>📦 Caches: ${cacheNames.length}`;
+            cacheNames.forEach(name => {
+                info += `<br>&nbsp;&nbsp;• ${name}`;
+            });
+            
+            // Service Workers
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            info += `<br><br>⚙️ Service Workers: ${registrations.length}`;
+            
+            // localStorage
+            info += `<br><br>💾 localStorage itens: ${localStorage.length}`;
+            
+            status.innerHTML = info;
+        });
+    </script>
+</body>
+</html>
