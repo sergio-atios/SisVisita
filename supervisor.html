@@ -1,0 +1,2705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Versionamento e Cache Control -->
+    <meta name="version" content="1.4.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>SisVisita - Administrador</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ec4899">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SisVisita Super">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Biblioteca de Compartilhamento -->
+    <script src="compartilhamento.js"></script>
+    
+    <style>
+        :root {
+            --color-vibrant-pink: #ec4899;
+            --color-vibrant-cyan: #06b6d4;
+            --color-vibrant-purple: #8b5cf6;
+            --color-dark-bg: #0f172a;
+            --color-dark-card: #1e293b;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-dark-bg);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .abstract-blob-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 450px;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .abstract-blob-bg::before,
+        .abstract-blob-bg::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.5;
+            filter: blur(80px);
+        }
+
+        .abstract-blob-bg::before {
+            width: 500px;
+            height: 500px;
+            top: -150px;
+            left: -120px;
+            background: radial-gradient(circle, var(--color-vibrant-pink) 0%, var(--color-vibrant-purple) 70%);
+            animation: pulse-blob 10s infinite alternate;
+        }
+
+        .abstract-blob-bg::after {
+            width: 420px;
+            height: 420px;
+            top: 60px;
+            right: -100px;
+            background: radial-gradient(circle, var(--color-vibrant-cyan) 0%, var(--color-dark-bg) 70%);
+            animation: pulse-blob 12s infinite reverse;
+        }
+
+        @keyframes pulse-blob {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.1) translate(5%, 5%); }
+            100% { transform: scale(1) translate(0, 0); }
+        }
+
+        .card-neobrutal {
+            background-color: var(--color-dark-card);
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .nav-btn {
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-btn.active {
+            border-bottom-color: var(--color-vibrant-cyan);
+            color: var(--color-vibrant-cyan);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .input-neobrutal {
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .input-neobrutal:focus {
+            outline: none;
+            border-color: var(--color-vibrant-cyan);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-aguardando { background-color: rgba(234, 179, 8, 0.2); color: #facc15; }
+        .badge-andamento { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .badge-concluido { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .badge-parcial { background-color: rgba(251, 146, 60, 0.2); color: #fb923c; }
+
+        /* Estilos para drag & drop */
+        .residencia-item {
+            transition: all 0.2s ease;
+        }
+
+        .residencia-item:hover {
+            background-color: rgba(51, 65, 85, 0.8) !important;
+        }
+
+        .residencia-item[draggable="true"] {
+            cursor: move;
+        }
+
+        .residencia-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Abstrato -->
+    <div class="abstract-blob-bg"></div>
+
+    <!-- Container Principal -->
+    <div class="container mx-auto px-4 py-6 max-w-7xl relative z-10">
+        
+        <!-- Header -->
+        <div class="mb-6">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1 class="text-4xl font-bold text-white flex items-center gap-2">
+                        <span class="text-5xl">👨‍💼</span> SisVisita
+                    </h1>
+                    <p class="text-gray-400 text-sm">Administrador Regional</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="exportarRelatorioCompleto()" class="btn-primary bg-gradient-to-r from-pink-500 to-purple-600 text-white flex items-center gap-2">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                        Relatório Completo
+                    </button>
+                    <button onclick="abrirModalConfiguracoes()" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegação -->
+        <div class="card-neobrutal p-4 mb-6">
+            <div class="flex gap-4 overflow-x-auto">
+                <button onclick="navegarPara('dashboard')" class="nav-btn px-4 py-2 text-white font-semibold active">
+                    📊 Dashboard
+                </button>
+                <button onclick="navegarPara('territorios')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
+                    📍 Territórios
+                </button>
+                <button onclick="navegarPara('unidades')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
+                    🏢 Unidade
+                </button>
+                <button onclick="navegarPara('relatorios')" class="nav-btn px-4 py-2 text-gray-400 font-semibold">
+                    📈 Relatórios
+                </button>
+            </div>
+        </div>
+
+        <!-- Seção: Dashboard -->
+        <section id="secao-dashboard" class="fade-in">
+            <!-- Estatísticas Gerais -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <div class="text-4xl font-bold text-pink-400" id="dashTotalUnidades">0</div>
+                    <div class="text-sm text-gray-400">Unidade Cadastradas</div>
+                </div>
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <div class="text-4xl font-bold text-purple-400" id="dashTotalTerritorios">0</div>
+                    <div class="text-sm text-gray-400">Territórios</div>
+                </div>
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <div class="text-4xl font-bold text-cyan-400" id="dashTotalResidencias">0</div>
+                    <div class="text-sm text-gray-400">Residências</div>
+                </div>
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <div class="text-4xl font-bold text-green-400" id="dashVisitadas">0</div>
+                    <div class="text-sm text-gray-400">Visitadas</div>
+                </div>
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <div class="text-4xl font-bold text-blue-400" id="dashPercentual">0%</div>
+                    <div class="text-sm text-gray-400">Progresso</div>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="card-neobrutal p-6">
+                    <h3 class="text-xl font-bold text-white mb-4">📊 Status dos Territórios</h3>
+                    <canvas id="graficoStatus"></canvas>
+                </div>
+                <div class="card-neobrutal p-6">
+                    <h3 class="text-xl font-bold text-white mb-4">📈 Progresso por Unidade</h3>
+                    <canvas id="graficoUnidades"></canvas>
+                </div>
+            </div>
+
+            <!-- Territórios Críticos -->
+            <div class="card-neobrutal p-6">
+                <h3 class="text-xl font-bold text-white mb-4">⚠️ Territórios que Precisam de Atenção</h3>
+                <div id="territoriosCriticos">
+                    <div class="text-center py-8 text-gray-400">
+                        <div class="text-4xl mb-2">✅</div>
+                        Nenhum território crítico no momento
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Territórios -->
+        <section id="secao-territorios" class="hidden fade-in">
+            <div class="card-neobrutal p-6 mb-6">
+                <div class="flex justify-between items-center mb-4 flex-wrap gap-4">
+                    <h2 class="text-2xl font-bold text-white">📍 Gerenciar Territórios</h2>
+                    <div class="flex gap-3">
+                        <button onclick="abrirModalNovoTerritorio()" class="btn-primary bg-gradient-to-r from-pink-500 to-purple-600 text-white flex items-center gap-2">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                            Novo Território
+                        </button>
+                        <label class="btn-primary bg-blue-600 hover:bg-blue-700 text-white cursor-pointer flex items-center gap-2">
+                            <i data-lucide="download" class="w-5 h-5"></i>
+                            Importar
+                            <input type="file" id="importarTerritorio" accept=".json" style="display: none;" onchange="importarTerritorio(event)">
+                        </label>
+                        <button onclick="gerarPacoteTerritorios()" class="btn-primary bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2">
+                            <i data-lucide="package" class="w-5 h-5"></i>
+                            Gerar Pacote
+                        </button>
+                        <button onclick="abrirLancamentoManual()" class="btn-primary bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
+                            <i data-lucide="edit" class="w-5 h-5"></i>
+                            Lançamento Manual
+                        </button>
+                        <label class="btn-primary bg-orange-600 hover:bg-orange-700 text-white cursor-pointer flex items-center gap-2">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                            Relatório Gestor
+                            <input type="file" id="importarRelatorioGestor" accept=".json" style="display: none;" onchange="importarRelatorioGestor(event)">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="flex gap-3 mb-4 overflow-x-auto">
+                    <button onclick="filtrarTerritorios('todos')" class="btn-filtro btn-primary bg-slate-600 text-white text-sm ring-2 ring-white ring-offset-2 ring-offset-slate-900">
+                        📋 Todos
+                    </button>
+                    <button onclick="filtrarTerritorios('aguardando_designacao')" class="btn-filtro btn-primary bg-yellow-600 text-white text-sm opacity-70">
+                        ⏳ Aguardando
+                    </button>
+                    <button onclick="filtrarTerritorios('em_andamento')" class="btn-filtro btn-primary bg-blue-600 text-white text-sm opacity-70">
+                        🔄 Em Andamento
+                    </button>
+                    <button onclick="filtrarTerritorios('concluido')" class="btn-filtro btn-primary bg-green-600 text-white text-sm opacity-70">
+                        ✅ Concluídos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lista de Territórios -->
+            <div id="listaTerritorios" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Territórios serão inseridos aqui -->
+            </div>
+
+            <!-- Botão Flutuante de Designação -->
+            <div id="btnDesignarFlutuante" class="hidden fixed bottom-8 right-8 z-40">
+                <button onclick="abrirModalDesignacao()" class="btn-primary bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-2xl px-6 py-4 text-lg">
+                    <i data-lucide="user-check" class="w-6 h-6 mr-2"></i>
+                    Designar <span id="countSelecionados">0</span> Selecionado(s)
+                </button>
+            </div>
+        </section>
+
+        <!-- Seção: Unidade -->
+        <section id="secao-unidades" class="hidden fade-in">
+            <div class="card-neobrutal p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-white">🏢 Gerenciar Unidade</h2>
+                    <button onclick="abrirModalNovaUnidade()" class="btn-primary bg-gradient-to-r from-cyan-500 to-blue-600 text-white flex items-center gap-2">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        Nova Unidade
+                    </button>
+                </div>
+
+                <div id="listaUnidades" class="space-y-3">
+                    <!-- Unidade serão inseridas aqui -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Relatórios -->
+        <section id="secao-relatorios" class="hidden fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Relatório por Unidade -->
+                <div class="card-neobrutal p-6">
+                    <h3 class="text-xl font-bold text-white mb-4">📊 Relatório por Unidade</h3>
+                    <div id="relatorioUnidades" class="space-y-3">
+                        <!-- Será preenchido dinamicamente -->
+                    </div>
+                </div>
+
+                <!-- Relatório por Status -->
+                <div class="card-neobrutal p-6">
+                    <h3 class="text-xl font-bold text-white mb-4">📈 Relatório por Status</h3>
+                    <div id="relatorioStatus" class="space-y-3">
+                        <!-- Será preenchido dinamicamente -->
+                    </div>
+                </div>
+
+                <!-- Exportações -->
+                <div class="card-neobrutal p-6 lg:col-span-2">
+                    <h3 class="text-xl font-bold text-white mb-4">📥 Exportações</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button onclick="exportarTodosPendentes()" class="btn-primary bg-yellow-600 hover:bg-yellow-700 text-white">
+                            📦 Territórios Pendentes
+                        </button>
+                        <button onclick="exportarTodosAndamento()" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white">
+                            🔄 Territórios em Andamento
+                        </button>
+                        <button onclick="exportarRelatorioCompleto()" class="btn-primary bg-pink-600 hover:bg-pink-700 text-white">
+                            📄 Relatório Completo (JSON)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal: Novo Território -->
+        <div id="modalNovoTerritorio" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalNovoTerritorio')">
+            <div class="card-neobrutal w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                <h3 class="text-2xl font-bold text-white mb-6">📍 Criar Novo Território</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Informações Básicas -->
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-cyan-400">Informações Básicas</h4>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Território *</label>
+                            <input type="text" id="novoTerrNome" class="input-neobrutal" placeholder="Ex: Zona Norte - Rua Dom Pedro">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">ID do Território *</label>
+                            <input type="text" id="novoTerrID" class="input-neobrutal" placeholder="Ex: T001">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Unidade (opcional)</label>
+                            <select id="novoTerrUnidade" class="input-neobrutal">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Região/Bairro</label>
+                            <input type="text" id="novoTerrRegiao" class="input-neobrutal" placeholder="Ex: Zona Norte">
+                        </div>
+                    </div>
+
+                    <!-- Adicionar Residências -->
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-cyan-400">Adicionar Residências</h4>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">CEP</label>
+                            <input type="text" id="novaResCEP" class="input-neobrutal" placeholder="16900-000">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Logradouro *</label>
+                            <input type="text" id="novaResLogradouro" class="input-neobrutal" placeholder="Rua Dom Pedro">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Número *</label>
+                                <input type="text" id="novaResNumero" class="input-neobrutal" placeholder="323">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Tipo</label>
+                                <select id="novaResTipo" class="input-neobrutal">
+                                    <option value="casa">Casa</option>
+                                    <option value="apartamento">Apartamento</option>
+                                    <option value="comercio">Comércio</option>
+                                    <option value="predio">Prédio</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Complemento</label>
+                            <input type="text" id="novaResComplemento" class="input-neobrutal" placeholder="Apto 101, Bloco A, etc">
+                        </div>
+
+                        <button onclick="adicionarResidencia()" class="btn-primary bg-green-600 hover:bg-green-700 text-white w-full">
+                            <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
+                            Adicionar Residência
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Residências Adicionadas -->
+                <div class="mt-6">
+                    <h4 class="text-lg font-semibold text-white mb-3">
+                        Residências Adicionadas (<span id="contadorResidencias">0</span>)
+                    </h4>
+                    <div id="listaResidenciasNovas" class="max-h-60 overflow-y-auto space-y-2">
+                        <div class="text-center py-4 text-gray-400">
+                            Nenhuma residência adicionada ainda
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="flex gap-3 mt-6">
+                    <button onclick="salvarNovoTerritorio()" class="btn-primary bg-gradient-to-r from-pink-500 to-purple-600 text-white flex-1">
+                        💾 Salvar Território
+                    </button>
+                    <button onclick="fecharModal('modalNovoTerritorio')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Nova Unidade -->
+        <div id="modalNovaUnidade" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalNovaUnidade')">
+            <div class="card-neobrutal w-full max-w-md p-6" onclick="event.stopPropagation()">
+                <h3 class="text-2xl font-bold text-white mb-4">🏢 Adicionar Unidade</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome da Unidade *</label>
+                        <input type="text" id="novaUnidadeNome" class="input-neobrutal" placeholder="Ex: Unidade Central">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Endereço</label>
+                        <input type="text" id="novaUnidadeEndereco" class="input-neobrutal" placeholder="Rua, número, bairro">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Gestor Responsável</label>
+                        <input type="text" id="novaUnidadeGestor" class="input-neobrutal" placeholder="Nome do gestor">
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="salvarNovaUnidade()" class="btn-primary bg-green-600 hover:bg-green-700 text-white flex-1">
+                            Salvar
+                        </button>
+                        <button onclick="fecharModal('modalNovaUnidade')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Configurações -->
+        <div id="modalConfiguracoes" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalConfiguracoes')">
+            <div class="card-neobrutal w-full max-w-md p-6" onclick="event.stopPropagation()">
+                <h3 class="text-2xl font-bold text-white mb-4">⚙️ Configurações</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Administrador</label>
+                        <input type="text" id="configAdministrador" class="input-neobrutal" placeholder="Seu nome">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Região</label>
+                        <input type="text" id="configRegiao" class="input-neobrutal" placeholder="Ex: Regional Sul">
+                    </div>
+
+                    <div class="p-4 bg-blue-900/20 border border-blue-600 rounded-lg">
+                        <h4 class="text-white font-semibold mb-3">💾 Backup e Restauração</h4>
+                        <div class="space-y-2">
+                            <button onclick="fazerBackupCompleto()" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white w-full text-sm">
+                                📦 Backup Completo
+                            </button>
+                            <button onclick="fazerBackupCadastros()" class="btn-primary bg-cyan-600 hover:bg-cyan-700 text-white w-full text-sm">
+                                📋 Backup de Cadastros
+                            </button>
+                            <label class="btn-primary bg-green-600 hover:bg-green-700 text-white w-full text-sm cursor-pointer flex items-center justify-center">
+                                📥 Restaurar Backup
+                                <input type="file" id="restaurarBackup" accept=".json" style="display: none;" onchange="restaurarBackup(event)">
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">
+                            💡 Faça backups regulares dos seus dados
+                        </p>
+                    </div>
+
+                    <div class="p-4 bg-red-900/20 border border-red-600 rounded-lg">
+                        <h4 class="text-white font-semibold mb-2">⚠️ Zona de Perigo</h4>
+                        <button onclick="limparTodosDados()" class="btn-primary bg-red-600 hover:bg-red-700 text-white w-full">
+                            🗑️ Limpar Todos os Dados
+                        </button>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="salvarConfiguracoes()" class="btn-primary bg-green-600 hover:bg-green-700 text-white flex-1">
+                            Salvar
+                        </button>
+                        <button onclick="fecharModal('modalConfiguracoes')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ===== VARIÁVEIS GLOBAIS =====
+        let territorios = [];
+        let unidades = [];
+        let config = { administrador: '', regiao: '' };
+        let residenciasNovas = [];
+        let filtroAtual = 'todos';
+        let graficos = {};
+
+        // ===== NAVEGAÇÃO =====
+        function navegarPara(secao) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('secao-' + secao).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-white');
+                btn.classList.add('text-gray-400');
+            });
+
+            if (window.event && window.event.target) {
+                window.event.target.classList.add('active', 'text-white');
+                window.event.target.classList.remove('text-gray-400');
+            }
+
+            if (secao === 'dashboard') atualizarDashboard();
+            if (secao === 'territorios') atualizarListaTerritorios();
+            if (secao === 'unidades') atualizarListaUnidades();
+            if (secao === 'relatorios') atualizarRelatorios();
+        }
+
+        // ===== FUNÇÕES DO SCRIPT ORIGINAL =====
+
+        // Variáveis Globais
+        let territorios = [];
+        let unidades = [];
+        let config = {
+            administrador: '',
+            regiao: ''
+        };
+        let residenciasNovas = [];
+        let filtroAtual = 'todos';
+        let graficos = {};
+
+        // Inicialização
+        
+            // === GERAR PACOTE DE TERRITÓRIOS ===
+        function gerarPacoteTerritorios() {
+            if (territorios.length === 0) {
+                alert('⚠️ Não há territórios cadastrados para gerar o pacote!');
+                return;
+            }
+
+            const pacote = {
+                tipo: 'pacote_territorios',
+                versao: '1.0',
+                congregacao: config.administrador || 'Congregação',
+                regiao: config.regiao || '',
+                data_geracao: new Date().toISOString(),
+                territorios: territorios.map(t => ({
+                    ...t,
+                    status_local: 'disponivel',
+                    executor_atual: null
+                }))
+            };
+
+            const dataStr = JSON.stringify(pacote, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const dataAtual = new Date().toISOString().split('T')[0];
+            link.href = url;
+            link.download = `pacote_territorios_${dataAtual}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert(`✅ Pacote gerado com sucesso!\n\n📦 ${territorios.length} território(s) incluído(s).\n\n💡 Distribua este arquivo para os executores e gestores.`);
+        }
+
+        // === LANÇAMENTO MANUAL ===
+        let territorioLancamento = null;
+
+        function abrirLancamentoManual() {
+            if (territorios.length === 0) {
+                alert('⚠️ Não há territórios cadastrados!');
+                return;
+            }
+
+            document.getElementById('modalLancamentoManual').classList.remove('hidden');
+            preencherSelectTerritoriosLancamento();
+        }
+
+        function preencherSelectTerritoriosLancamento() {
+            const select = document.getElementById('lancamentoTerritorio');
+            select.innerHTML = '<option value="">Selecione um território...</option>';
+            
+            territorios.forEach(t => {
+                select.innerHTML += `<option value="${t.territorio_id}">${t.nome} (${t.territorio_id})</option>`;
+            });
+        }
+
+        function carregarTerritorioLancamento() {
+            const territorioId = document.getElementById('lancamentoTerritorio').value;
+            if (!territorioId) {
+                document.getElementById('lancamentoResidencias').innerHTML = '';
+                territorioLancamento = null;
+                return;
+            }
+
+            territorioLancamento = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorioLancamento) return;
+
+            document.getElementById('lancamentoExecutor').value = '';
+            renderizarResidenciasLancamento();
+        }
+
+        function renderizarResidenciasLancamento() {
+            const container = document.getElementById('lancamentoResidencias');
+            if (!territorioLancamento) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const porLogradouro = {};
+            territorioLancamento.residencias.forEach(r => {
+                if (!porLogradouro[r.logradouro]) {
+                    porLogradouro[r.logradouro] = [];
+                }
+                porLogradouro[r.logradouro].push(r);
+            });
+
+            let html = '';
+            Object.keys(porLogradouro).forEach(logradouro => {
+                const residencias = porLogradouro[logradouro];
+                const todasVisitadas = residencias.every(r => r.visitado);
+
+                html += `
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-semibold text-white">📍 ${logradouro}</h4>
+                            <button onclick="marcarRuaLancamento('${logradouro}', ${!todasVisitadas})" class="px-3 py-1 rounded text-sm ${todasVisitadas ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white">
+                                ${todasVisitadas ? '❌ Desmarcar Rua' : '✅ Marcar Rua'}
+                            </button>
+                        </div>
+                        <div class="space-y-2">
+                `;
+
+                residencias.forEach(r => {
+                    html += `
+                        <label class="flex items-center gap-3 p-2 rounded ${r.visitado ? 'bg-green-900/20' : 'bg-slate-700/50'} cursor-pointer">
+                            <input type="checkbox" ${r.visitado ? 'checked' : ''} onchange="toggleResidenciaLancamento('${r.id}')" class="checkbox-custom">
+                            <span class="text-white">${r.numero}${r.complemento ? ' - ' + r.complemento : ''}</span>
+                        </label>
+                    `;
+                });
+
+                html += `</div></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function marcarRuaLancamento(logradouro, marcar) {
+            territorioLancamento.residencias.forEach(r => {
+                if (r.logradouro === logradouro) {
+                    r.visitado = marcar;
+                    r.data_visita = marcar ? new Date().toISOString() : null;
+                }
+            });
+            renderizarResidenciasLancamento();
+        }
+
+        function toggleResidenciaLancamento(residenciaId) {
+            const residencia = territorioLancamento.residencias.find(r => r.id === residenciaId);
+            if (residencia) {
+                residencia.visitado = !residencia.visitado;
+                residencia.data_visita = residencia.visitado ? new Date().toISOString() : null;
+            }
+            renderizarResidenciasLancamento();
+        }
+
+        function salvarLancamentoManual() {
+            const executor = document.getElementById('lancamentoExecutor').value.trim();
+            
+            if (!executor) {
+                alert('⚠️ Digite o nome do executor!');
+                return;
+            }
+
+            if (!territorioLancamento) {
+                alert('⚠️ Selecione um território!');
+                return;
+            }
+
+            const index = territorios.findIndex(t => t.territorio_id === territorioLancamento.territorio_id);
+            if (index !== -1) {
+                territorios[index] = territorioLancamento;
+                territorios[index].colaborador = executor;
+                territorios[index].status = 'em_andamento';
+                territorios[index].atualizado_em = new Date().toISOString();
+                
+                const visitadas = territorioLancamento.residencias.filter(r => r.visitado).length;
+                const total = territorioLancamento.residencias.length;
+                territorios[index].estatisticas = {
+                    total_residencias: total,
+                    visitadas: visitadas,
+                    pendentes: total - visitadas,
+                    percentual_conclusao: (visitadas / total) * 100
+                };
+                
+                salvarDados();
+                fecharModal('modalLancamentoManual');
+                atualizarTodasInterfaces();
+                alert(`✅ Lançamento registrado!\n\nTerritório: ${territorioLancamento.nome}\nExecutor: ${executor}\nVisitadas: ${visitadas}/${total}`);
+            }
+        }
+
+        // === IMPORTAR RELATÓRIO GESTOR ===
+        function importarRelatorioGestor(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const relatorio = JSON.parse(e.target.result);
+                    
+                    if (relatorio.tipo !== 'relatorio_gestor') {
+                        alert('❌ Arquivo inválido! Selecione um relatório de gestor.');
+                        return;
+                    }
+
+                    let processados = 0;
+                    relatorio.designacoes.forEach(designacao => {
+                        const index = territorios.findIndex(t => t.territorio_id === designacao.territorio_id);
+                        if (index !== -1) {
+                            if (designacao.status === 'devolvido' && designacao.estatisticas) {
+                                territorios[index].colaborador = designacao.executor;
+                                territorios[index].estatisticas = designacao.estatisticas;
+                                territorios[index].status = 'concluido';
+                                territorios[index].atualizado_em = designacao.data_devolucao;
+                            } else {
+                                territorios[index].colaborador = designacao.executor;
+                                territorios[index].status = 'em_andamento';
+                                territorios[index].atualizado_em = designacao.data_designacao;
+                            }
+                            processados++;
+                        }
+                    });
+
+                    salvarDados();
+                    atualizarTodasInterfaces();
+                    alert(`✅ Relatório processado!\n\n${processados} designação(ões) atualizada(s).`);
+                } catch (error) {
+                    alert('❌ Erro ao processar relatório: ' + error.message);
+                }
+            };
+            reader.readAsText(arquivo);
+            event.target.value = '';
+        }
+
+        lucide.createIcons();
+            
+            // Registrar Service Worker (PWA)
+            if ('serviceWorker' in navigator) {
+                try {
+                    await navigator.serviceWorker.register('service-worker.js');
+                    console.log('Service Worker registrado');
+                } catch (erro) {
+                    console.log('Service Worker falhou:', erro);
+                }
+            }
+            
+            carregarDados();
+            atualizarTodasInterfaces();
+        });
+
+        // === GESTÃO DE DADOS ===
+        function carregarDados() {
+            const territoriosSalvos = localStorage.getItem('sisVisita_super_territorios');
+            const unidadesSalvas = localStorage.getItem('sisVisita_super_unidades');
+            const configSalva = localStorage.getItem('sisVisita_super_config');
+
+            if (territoriosSalvos) territorios = JSON.parse(territoriosSalvos);
+            if (unidadesSalvas) unidades = JSON.parse(unidadesSalvas);
+            if (configSalva) config = JSON.parse(configSalva);
+        }
+
+        function salvarDados() {
+            localStorage.setItem('sisVisita_super_territorios', JSON.stringify(territorios));
+            localStorage.setItem('sisVisita_super_unidades', JSON.stringify(unidades));
+            localStorage.setItem('sisVisita_super_config', JSON.stringify(config));
+        }
+
+        // === NAVEGAÇÃO ===
+        );
+
+            event.target.classList.add('active', 'text-white');
+            event.target.classList.remove('text-gray-400');
+
+            if (secao === 'dashboard') atualizarDashboard();
+            if (secao === 'territorios') atualizarListaTerritorios();
+            if (secao === 'unidades') atualizarListaUnidades();
+            if (secao === 'relatorios') atualizarRelatorios();
+
+            // === GERAR PACOTE DE TERRITÓRIOS ===
+        function gerarPacoteTerritorios() {
+            if (territorios.length === 0) {
+                alert('⚠️ Não há territórios cadastrados para gerar o pacote!');
+                return;
+            }
+
+            const pacote = {
+                tipo: 'pacote_territorios',
+                versao: '1.0',
+                congregacao: config.administrador || 'Congregação',
+                regiao: config.regiao || '',
+                data_geracao: new Date().toISOString(),
+                territorios: territorios.map(t => ({
+                    ...t,
+                    status_local: 'disponivel',
+                    executor_atual: null
+                }))
+            };
+
+            const dataStr = JSON.stringify(pacote, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const dataAtual = new Date().toISOString().split('T')[0];
+            link.href = url;
+            link.download = `pacote_territorios_${dataAtual}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert(`✅ Pacote gerado com sucesso!\n\n📦 ${territorios.length} território(s) incluído(s).\n\n💡 Distribua este arquivo para os executores e gestores.`);
+        }
+
+        // === LANÇAMENTO MANUAL ===
+        let territorioLancamento = null;
+
+        function abrirLancamentoManual() {
+            if (territorios.length === 0) {
+                alert('⚠️ Não há territórios cadastrados!');
+                return;
+            }
+
+            document.getElementById('modalLancamentoManual').classList.remove('hidden');
+            preencherSelectTerritoriosLancamento();
+        }
+
+        function preencherSelectTerritoriosLancamento() {
+            const select = document.getElementById('lancamentoTerritorio');
+            select.innerHTML = '<option value="">Selecione um território...</option>';
+            
+            territorios.forEach(t => {
+                select.innerHTML += `<option value="${t.territorio_id}">${t.nome} (${t.territorio_id})</option>`;
+            });
+        }
+
+        function carregarTerritorioLancamento() {
+            const territorioId = document.getElementById('lancamentoTerritorio').value;
+            if (!territorioId) {
+                document.getElementById('lancamentoResidencias').innerHTML = '';
+                territorioLancamento = null;
+                return;
+            }
+
+            territorioLancamento = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorioLancamento) return;
+
+            document.getElementById('lancamentoExecutor').value = '';
+            renderizarResidenciasLancamento();
+        }
+
+        function renderizarResidenciasLancamento() {
+            const container = document.getElementById('lancamentoResidencias');
+            if (!territorioLancamento) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const porLogradouro = {};
+            territorioLancamento.residencias.forEach(r => {
+                if (!porLogradouro[r.logradouro]) {
+                    porLogradouro[r.logradouro] = [];
+                }
+                porLogradouro[r.logradouro].push(r);
+            });
+
+            let html = '';
+            Object.keys(porLogradouro).forEach(logradouro => {
+                const residencias = porLogradouro[logradouro];
+                const todasVisitadas = residencias.every(r => r.visitado);
+
+                html += `
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-semibold text-white">📍 ${logradouro}</h4>
+                            <button onclick="marcarRuaLancamento('${logradouro}', ${!todasVisitadas})" class="px-3 py-1 rounded text-sm ${todasVisitadas ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white">
+                                ${todasVisitadas ? '❌ Desmarcar Rua' : '✅ Marcar Rua'}
+                            </button>
+                        </div>
+                        <div class="space-y-2">
+                `;
+
+                residencias.forEach(r => {
+                    html += `
+                        <label class="flex items-center gap-3 p-2 rounded ${r.visitado ? 'bg-green-900/20' : 'bg-slate-700/50'} cursor-pointer">
+                            <input type="checkbox" ${r.visitado ? 'checked' : ''} onchange="toggleResidenciaLancamento('${r.id}')" class="checkbox-custom">
+                            <span class="text-white">${r.numero}${r.complemento ? ' - ' + r.complemento : ''}</span>
+                        </label>
+                    `;
+                });
+
+                html += `</div></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function marcarRuaLancamento(logradouro, marcar) {
+            territorioLancamento.residencias.forEach(r => {
+                if (r.logradouro === logradouro) {
+                    r.visitado = marcar;
+                    r.data_visita = marcar ? new Date().toISOString() : null;
+                }
+            });
+            renderizarResidenciasLancamento();
+        }
+
+        function toggleResidenciaLancamento(residenciaId) {
+            const residencia = territorioLancamento.residencias.find(r => r.id === residenciaId);
+            if (residencia) {
+                residencia.visitado = !residencia.visitado;
+                residencia.data_visita = residencia.visitado ? new Date().toISOString() : null;
+            }
+            renderizarResidenciasLancamento();
+        }
+
+        function salvarLancamentoManual() {
+            const executor = document.getElementById('lancamentoExecutor').value.trim();
+            
+            if (!executor) {
+                alert('⚠️ Digite o nome do executor!');
+                return;
+            }
+
+            if (!territorioLancamento) {
+                alert('⚠️ Selecione um território!');
+                return;
+            }
+
+            const index = territorios.findIndex(t => t.territorio_id === territorioLancamento.territorio_id);
+            if (index !== -1) {
+                territorios[index] = territorioLancamento;
+                territorios[index].colaborador = executor;
+                territorios[index].status = 'em_andamento';
+                territorios[index].atualizado_em = new Date().toISOString();
+                
+                const visitadas = territorioLancamento.residencias.filter(r => r.visitado).length;
+                const total = territorioLancamento.residencias.length;
+                territorios[index].estatisticas = {
+                    total_residencias: total,
+                    visitadas: visitadas,
+                    pendentes: total - visitadas,
+                    percentual_conclusao: (visitadas / total) * 100
+                };
+                
+                salvarDados();
+                fecharModal('modalLancamentoManual');
+                atualizarTodasInterfaces();
+                alert(`✅ Lançamento registrado!\n\nTerritório: ${territorioLancamento.nome}\nExecutor: ${executor}\nVisitadas: ${visitadas}/${total}`);
+            }
+        }
+
+        // === IMPORTAR RELATÓRIO GESTOR ===
+        function importarRelatorioGestor(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const relatorio = JSON.parse(e.target.result);
+                    
+                    if (relatorio.tipo !== 'relatorio_gestor') {
+                        alert('❌ Arquivo inválido! Selecione um relatório de gestor.');
+                        return;
+                    }
+
+                    let processados = 0;
+                    relatorio.designacoes.forEach(designacao => {
+                        const index = territorios.findIndex(t => t.territorio_id === designacao.territorio_id);
+                        if (index !== -1) {
+                            if (designacao.status === 'devolvido' && designacao.estatisticas) {
+                                territorios[index].colaborador = designacao.executor;
+                                territorios[index].estatisticas = designacao.estatisticas;
+                                territorios[index].status = 'concluido';
+                                territorios[index].atualizado_em = designacao.data_devolucao;
+                            } else {
+                                territorios[index].colaborador = designacao.executor;
+                                territorios[index].status = 'em_andamento';
+                                territorios[index].atualizado_em = designacao.data_designacao;
+                            }
+                            processados++;
+                        }
+                    });
+
+                    salvarDados();
+                    atualizarTodasInterfaces();
+                    alert(`✅ Relatório processado!\n\n${processados} designação(ões) atualizada(s).`);
+                } catch (error) {
+                    alert('❌ Erro ao processar relatório: ' + error.message);
+                }
+            };
+            reader.readAsText(arquivo);
+            event.target.value = '';
+        }
+
+        lucide.createIcons();
+        }
+
+        function atualizarTodasInterfaces() {
+            atualizarDashboard();
+            atualizarListaTerritorios();
+            atualizarListaUnidades();
+            atualizarRelatorios();
+            // === GERAR PACOTE DE TERRITÓRIOS ===
+        function gerarPacoteTerritorios() {
+            if (territorios.length === 0) {
+                alert('⚠️ Não há territórios cadastrados para gerar o pacote!');
+                return;
+            }
+
+            const pacote = {
+                tipo: 'pacote_territorios',
+                versao: '1.0',
+                congregacao: config.administrador || 'Congregação',
+                regiao: config.regiao || '',
+                data_geracao: new Date().toISOString(),
+                territorios: territorios.map(t => ({
+                    ...t,
+                    status_local: 'disponivel',
+                    executor_atual: null
+                }))
+            };
+
+            const dataStr = JSON.stringify(pacote, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const dataAtual = new Date().toISOString().split('T')[0];
+            link.href = url;
+            link.download = `pacote_territorios_${dataAtual}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert(`✅ Pacote gerado com sucesso!\n\n📦 ${territorios.length} território(s) incluído(s).\n\n💡 Distribua este arquivo para os executores e gestores.`);
+        }
+
+        // === LANÇAMENTO MANUAL ===
+        let territorioLancamento = null;
+
+        function abrirLancamentoManual() {
+            if (territorios.length === 0) {
+                alert('⚠️ Não há territórios cadastrados!');
+                return;
+            }
+
+            document.getElementById('modalLancamentoManual').classList.remove('hidden');
+            preencherSelectTerritoriosLancamento();
+        }
+
+        function preencherSelectTerritoriosLancamento() {
+            const select = document.getElementById('lancamentoTerritorio');
+            select.innerHTML = '<option value="">Selecione um território...</option>';
+            
+            territorios.forEach(t => {
+                select.innerHTML += `<option value="${t.territorio_id}">${t.nome} (${t.territorio_id})</option>`;
+            });
+        }
+
+        function carregarTerritorioLancamento() {
+            const territorioId = document.getElementById('lancamentoTerritorio').value;
+            if (!territorioId) {
+                document.getElementById('lancamentoResidencias').innerHTML = '';
+                territorioLancamento = null;
+                return;
+            }
+
+            territorioLancamento = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorioLancamento) return;
+
+            document.getElementById('lancamentoExecutor').value = '';
+            renderizarResidenciasLancamento();
+        }
+
+        function renderizarResidenciasLancamento() {
+            const container = document.getElementById('lancamentoResidencias');
+            if (!territorioLancamento) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const porLogradouro = {};
+            territorioLancamento.residencias.forEach(r => {
+                if (!porLogradouro[r.logradouro]) {
+                    porLogradouro[r.logradouro] = [];
+                }
+                porLogradouro[r.logradouro].push(r);
+            });
+
+            let html = '';
+            Object.keys(porLogradouro).forEach(logradouro => {
+                const residencias = porLogradouro[logradouro];
+                const todasVisitadas = residencias.every(r => r.visitado);
+
+                html += `
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-semibold text-white">📍 ${logradouro}</h4>
+                            <button onclick="marcarRuaLancamento('${logradouro}', ${!todasVisitadas})" class="px-3 py-1 rounded text-sm ${todasVisitadas ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white">
+                                ${todasVisitadas ? '❌ Desmarcar Rua' : '✅ Marcar Rua'}
+                            </button>
+                        </div>
+                        <div class="space-y-2">
+                `;
+
+                residencias.forEach(r => {
+                    html += `
+                        <label class="flex items-center gap-3 p-2 rounded ${r.visitado ? 'bg-green-900/20' : 'bg-slate-700/50'} cursor-pointer">
+                            <input type="checkbox" ${r.visitado ? 'checked' : ''} onchange="toggleResidenciaLancamento('${r.id}')" class="checkbox-custom">
+                            <span class="text-white">${r.numero}${r.complemento ? ' - ' + r.complemento : ''}</span>
+                        </label>
+                    `;
+                });
+
+                html += `</div></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function marcarRuaLancamento(logradouro, marcar) {
+            territorioLancamento.residencias.forEach(r => {
+                if (r.logradouro === logradouro) {
+                    r.visitado = marcar;
+                    r.data_visita = marcar ? new Date().toISOString() : null;
+                }
+            });
+            renderizarResidenciasLancamento();
+        }
+
+        function toggleResidenciaLancamento(residenciaId) {
+            const residencia = territorioLancamento.residencias.find(r => r.id === residenciaId);
+            if (residencia) {
+                residencia.visitado = !residencia.visitado;
+                residencia.data_visita = residencia.visitado ? new Date().toISOString() : null;
+            }
+            renderizarResidenciasLancamento();
+        }
+
+        function salvarLancamentoManual() {
+            const executor = document.getElementById('lancamentoExecutor').value.trim();
+            
+            if (!executor) {
+                alert('⚠️ Digite o nome do executor!');
+                return;
+            }
+
+            if (!territorioLancamento) {
+                alert('⚠️ Selecione um território!');
+                return;
+            }
+
+            const index = territorios.findIndex(t => t.territorio_id === territorioLancamento.territorio_id);
+            if (index !== -1) {
+                territorios[index] = territorioLancamento;
+                territorios[index].colaborador = executor;
+                territorios[index].status = 'em_andamento';
+                territorios[index].atualizado_em = new Date().toISOString();
+                
+                const visitadas = territorioLancamento.residencias.filter(r => r.visitado).length;
+                const total = territorioLancamento.residencias.length;
+                territorios[index].estatisticas = {
+                    total_residencias: total,
+                    visitadas: visitadas,
+                    pendentes: total - visitadas,
+                    percentual_conclusao: (visitadas / total) * 100
+                };
+                
+                salvarDados();
+                fecharModal('modalLancamentoManual');
+                atualizarTodasInterfaces();
+                alert(`✅ Lançamento registrado!\n\nTerritório: ${territorioLancamento.nome}\nExecutor: ${executor}\nVisitadas: ${visitadas}/${total}`);
+            }
+        }
+
+        // === IMPORTAR RELATÓRIO GESTOR ===
+        function importarRelatorioGestor(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const relatorio = JSON.parse(e.target.result);
+                    
+                    if (relatorio.tipo !== 'relatorio_gestor') {
+                        alert('❌ Arquivo inválido! Selecione um relatório de gestor.');
+                        return;
+                    }
+
+                    let processados = 0;
+                    relatorio.designacoes.forEach(designacao => {
+                        const index = territorios.findIndex(t => t.territorio_id === designacao.territorio_id);
+                        if (index !== -1) {
+                            if (designacao.status === 'devolvido' && designacao.estatisticas) {
+                                territorios[index].colaborador = designacao.executor;
+                                territorios[index].estatisticas = designacao.estatisticas;
+                                territorios[index].status = 'concluido';
+                                territorios[index].atualizado_em = designacao.data_devolucao;
+                            } else {
+                                territorios[index].colaborador = designacao.executor;
+                                territorios[index].status = 'em_andamento';
+                                territorios[index].atualizado_em = designacao.data_designacao;
+                            }
+                            processados++;
+                        }
+                    });
+
+                    salvarDados();
+                    atualizarTodasInterfaces();
+                    alert(`✅ Relatório processado!\n\n${processados} designação(ões) atualizada(s).`);
+                } catch (error) {
+                    alert('❌ Erro ao processar relatório: ' + error.message);
+                }
+            };
+            reader.readAsText(arquivo);
+            event.target.value = '';
+        }
+
+        lucide.createIcons();
+        }
+
+        // === DASHBOARD ===
+        function atualizarDashboard() {
+            const totalUnidades = unidades.length;
+            const totalTerritorios = territorios.length;
+            
+            let totalResidencias = 0;
+            let visitadas = 0;
+
+            territorios.forEach(t => {
+                totalResidencias += t.estatisticas.total_residencias;
+                visitadas += t.estatisticas.visitadas;
+            });
+
+            const percentual = totalResidencias > 0 ? ((visitadas / totalResidencias) * 100).toFixed(1) : 0;
+
+            document.getElementById('dashTotalUnidades').textContent = totalUnidades;
+            document.getElementById('dashTotalTerritorios').textContent = totalTerritorios;
+            document.getElementById('dashTotalResidencias').textContent = totalResidencias;
+            document.getElementById('dashVisitadas').textContent = visitadas;
+            document.getElementById('dashPercentual').textContent = percentual + '%';
+
+            atualizarGraficos();
+            atualizarTerritoriosCriticos();
+        }
+
+        function atualizarGraficos() {
+            // Gráfico de Status
+            const aguardando = territorios.filter(t => t.status === 'aguardando_designacao').length;
+            const andamento = territorios.filter(t => t.status === 'em_andamento').length;
+            const concluido = territorios.filter(t => t.status === 'concluido').length;
+            const parcial = territorios.filter(t => t.status === 'parcialmente_concluido').length;
+
+            if (graficos.status) graficos.status.destroy();
+            
+            const ctxStatus = document.getElementById('graficoStatus').getContext('2d');
+            graficos.status = new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Aguardando', 'Em Andamento', 'Concluído', 'Parcial'],
+                    datasets: [{
+                        data: [aguardando, andamento, concluido, parcial],
+                        backgroundColor: ['#facc15', '#60a5fa', '#4ade80', '#fb923c']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    }
+                }
+            });
+
+            // Gráfico por Unidade
+            const unidadesLabels = unidades.map(u => u.nome);
+            const unidadesData = unidades.map(u => {
+                const terrs = territorios.filter(t => t.unidades === u.nome);
+                const total = terrs.reduce((sum, t) => sum + t.estatisticas.total_residencias, 0);
+                const vis = terrs.reduce((sum, t) => sum + t.estatisticas.visitadas, 0);
+                return total > 0 ? ((vis / total) * 100).toFixed(1) : 0;
+            });
+
+            if (graficos.unidades) graficos.unidades.destroy();
+            
+            const ctxUnidades = document.getElementById('graficoUnidades').getContext('2d');
+            graficos.unidades = new Chart(ctxUnidades, {
+                type: 'bar',
+                data: {
+                    labels: unidadesLabels,
+                    datasets: [{
+                        label: 'Progresso (%)',
+                        data: unidadesData,
+                        backgroundColor: '#ec4899'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, max: 100, ticks: { color: '#fff' } },
+                        x: { ticks: { color: '#fff' } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
+        function atualizarTerritoriosCriticos() {
+            const criticos = territorios.filter(t => 
+                t.status === 'em_andamento' && 
+                (new Date() - new Date(t.atualizado_em)) > 7 * 24 * 60 * 60 * 1000
+            );
+
+            const container = document.getElementById('territoriosCriticos');
+            
+            if (criticos.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <div class="text-4xl mb-2">✅</div>
+                        Nenhum território crítico no momento
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            criticos.forEach(t => {
+                html += `
+                    <div class="p-4 bg-orange-900/20 border border-orange-600 rounded-lg mb-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-white font-semibold">${t.nome}</div>
+                                <div class="text-sm text-gray-400">Unidade: ${t.unidades} • Colaborador: ${t.colaborador || 'Não designado'}</div>
+                            </div>
+                            <span class="text-orange-400 text-sm">⚠️ Sem atualização há 7+ dias</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // === TERRITÓRIOS ===
+        function abrirModalNovoTerritorio() {
+            // Limpar campos
+            document.getElementById('novoTerrNome').value = '';
+            document.getElementById('novoTerrID').value = '';
+            document.getElementById('novoTerrRegiao').value = '';
+            document.getElementById('novaResCEP').value = '';
+            document.getElementById('novaResLogradouro').value = '';
+            document.getElementById('novaResNumero').value = '';
+            document.getElementById('novaResComplemento').value = '';
+            
+            residenciasNovas = [];
+            atualizarListaResidenciasNovas();
+
+            // Preencher select de Unidade
+            const select = document.getElementById('novoTerrUnidade');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            unidades.forEach(u => {
+                select.innerHTML += `<option value="${u.nome}">${u.nome}</option>`;
+            });
+
+            document.getElementById('modalNovoTerritorio').classList.remove('hidden');
+        }
+
+        function adicionarResidencia() {
+            const logradouro = document.getElementById('novaResLogradouro').value.trim();
+            const numero = document.getElementById('novaResNumero').value.trim();
+
+            if (!logradouro || !numero) {
+                alert('⚠️ Preencha Logradouro e Número!');
+                return;
+            }
+
+            const residencia = {
+                id: 'R' + Date.now(),
+                cep: document.getElementById('novaResCEP').value.trim(),
+                pais: 'Brasil',
+                cidade: '',
+                regiao: document.getElementById('novoTerrRegiao').value.trim(),
+                logradouro: logradouro,
+                numero: numero,
+                tipo: document.getElementById('novaResTipo').value,
+                complemento: document.getElementById('novaResComplemento').value.trim(),
+                visitado: false,
+                data_visita: null,
+                nota: '',
+                precisa_alteracao: false
+            };
+
+            residenciasNovas.push(residencia);
+            atualizarListaResidenciasNovas();
+
+            // Limpar apenas campos de residência
+            document.getElementById('novaResNumero').value = '';
+            document.getElementById('novaResComplemento').value = '';
+            document.getElementById('novaResNumero').focus();
+        }
+
+        function atualizarListaResidenciasNovas() {
+            const container = document.getElementById('listaResidenciasNovas');
+            document.getElementById('contadorResidencias').textContent = residenciasNovas.length;
+
+            if (residenciasNovas.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-gray-400">
+                        Nenhuma residência adicionada ainda
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            residenciasNovas.forEach((r, i) => {
+                html += `
+                    <div class="residencia-item p-3 bg-slate-700/50 rounded-lg flex justify-between items-center cursor-move" 
+                         draggable="true" 
+                         data-index="${i}"
+                         ondragstart="dragStart(event, ${i})"
+                         ondragover="dragOver(event)"
+                         ondrop="drop(event, ${i})"
+                         ondragenter="dragEnter(event)"
+                         ondragleave="dragLeave(event)">
+                        <div class="flex items-center gap-3">
+                            <span class="text-gray-400 cursor-move" title="Arraste para reordenar">☰</span>
+                            <div>
+                                <div class="text-white font-semibold">${r.logradouro}, ${r.numero}</div>
+                                <div class="text-xs text-gray-400">${r.tipo}${r.complemento ? ' • ' + r.complemento : ''}</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="moverResidencia(${i}, 'cima')" class="text-blue-400 hover:text-blue-300 text-sm" title="Mover para cima">
+                                ⬆️
+                            </button>
+                            <button onclick="moverResidencia(${i}, 'baixo')" class="text-blue-400 hover:text-blue-300 text-sm" title="Mover para baixo">
+                                ⬇️
+                            </button>
+                            <button onclick="removerResidencia(${i})" class="text-red-400 hover:text-red-300" title="Remover">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // === FUNÇÕES DE REORDENAÇÃO ===
+        let draggedIndex = null;
+
+        function dragStart(event, index) {
+            draggedIndex = index;
+            event.currentTarget.style.opacity = '0.5';
+        }
+
+        function dragOver(event) {
+            event.preventDefault();
+        }
+
+        function dragEnter(event) {
+            if (event.currentTarget.classList.contains('residencia-item')) {
+                event.currentTarget.style.borderTop = '2px solid #3b82f6';
+            }
+        }
+
+        function dragLeave(event) {
+            if (event.currentTarget.classList.contains('residencia-item')) {
+                event.currentTarget.style.borderTop = '';
+            }
+        }
+
+        function drop(event, dropIndex) {
+            event.preventDefault();
+            event.currentTarget.style.borderTop = '';
+            event.currentTarget.style.opacity = '1';
+
+            if (draggedIndex === null || draggedIndex === dropIndex) return;
+
+            // Reordenar array
+            const item = residenciasNovas[draggedIndex];
+            residenciasNovas.splice(draggedIndex, 1);
+            residenciasNovas.splice(dropIndex, 0, item);
+
+            draggedIndex = null;
+            atualizarListaResidenciasNovas();
+        }
+
+        function moverResidencia(index, direcao) {
+            if (direcao === 'cima' && index > 0) {
+                // Trocar com o anterior
+                [residenciasNovas[index], residenciasNovas[index - 1]] = [residenciasNovas[index - 1], residenciasNovas[index]];
+                atualizarListaResidenciasNovas();
+            } else if (direcao === 'baixo' && index < residenciasNovas.length - 1) {
+                // Trocar com o próximo
+                [residenciasNovas[index], residenciasNovas[index + 1]] = [residenciasNovas[index + 1], residenciasNovas[index]];
+                atualizarListaResidenciasNovas();
+            }
+        }
+
+        function removerResidencia(index) {
+            residenciasNovas.splice(index, 1);
+            atualizarListaResidenciasNovas();
+        }
+
+        function salvarNovoTerritorio() {
+            const nome = document.getElementById('novoTerrNome').value.trim();
+            const id = document.getElementById('novoTerrID').value.trim();
+            const unidadeNome = document.getElementById('novoTerrUnidade').value;
+            const regiao = document.getElementById('novoTerrRegiao').value.trim();
+            const modal = document.getElementById('modalNovoTerritorio');
+            const editandoId = modal.dataset.editando;
+
+            if (!nome || !id) {
+                alert('⚠️ Preencha todos os campos obrigatórios (*)!');
+                return;
+            }
+
+            if (residenciasNovas.length === 0) {
+                alert('⚠️ Adicione pelo menos uma residência!');
+                return;
+            }
+
+            // Se está editando
+            if (editandoId) {
+                const territorioIndex = territorios.findIndex(t => t.territorio_id === editandoId);
+                if (territorioIndex !== -1) {
+                    const territorioAntigo = territorios[territorioIndex];
+                    
+                    // Manter informações de status e datas
+                    territorios[territorioIndex] = {
+                        ...territorioAntigo,
+                        nome: nome,
+                        unidades: unidadeNome,
+                        atualizado_em: new Date().toISOString(),
+                        residencias: residenciasNovas,
+                        estatisticas: {
+                            total_residencias: residenciasNovas.length,
+                            visitadas: residenciasNovas.filter(r => r.visitado).length,
+                            pendentes: residenciasNovas.filter(r => !r.visitado).length,
+                            percentual_conclusao: (residenciasNovas.filter(r => r.visitado).length / residenciasNovas.length) * 100
+                        }
+                    };
+                    
+                    salvarDados();
+                    delete modal.dataset.editando;
+                    document.getElementById('novoTerrID').disabled = false;
+                    fecharModal('modalNovoTerritorio');
+                    atualizarTodasInterfaces();
+                    alert('✅ Território atualizado com sucesso!');
+                    return;
+                }
+            }
+
+            // Verificar se ID já existe (apenas ao criar novo)
+            if (territorios.find(t => t.territorio_id === id)) {
+                alert('⚠️ Já existe um território com este ID!');
+                return;
+            }
+
+            const territorio = {
+                tipo: 'territorio',
+                versao: '1.0',
+                territorio_id: id,
+                nome: nome,
+                unidades: unidadeNome,
+                gestor: null,
+                colaborador: null,
+                status: 'aguardando_designacao',
+                criado_em: new Date().toISOString(),
+                atualizado_em: new Date().toISOString(),
+                estatisticas: {
+                    total_residencias: residenciasNovas.length,
+                    visitadas: 0,
+                    pendentes: residenciasNovas.length,
+                    percentual_conclusao: 0
+                },
+                residencias: residenciasNovas
+            };
+
+            territorios.push(territorio);
+            salvarDados();
+            fecharModal('modalNovoTerritorio');
+            atualizarTodasInterfaces();
+            alert('✅ Território criado com sucesso!');
+        }
+
+        function importarTerritorio(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const dados = JSON.parse(e.target.result);
+                    
+                    if (dados.tipo !== 'territorio') {
+                        alert('❌ Arquivo inválido!');
+                        return;
+                    }
+
+                    const existe = territorios.find(t => t.territorio_id === dados.territorio_id);
+                    if (existe) {
+                        if (!confirm(`Território "${dados.nome}" já existe. Deseja substituir?`)) return;
+                        territorios = territorios.filter(t => t.territorio_id !== dados.territorio_id);
+                    }
+
+                    territorios.push(dados);
+                    salvarDados();
+                    atualizarTodasInterfaces();
+                    alert('✅ Território importado com sucesso!');
+                } catch (error) {
+                    alert('❌ Erro ao ler arquivo: ' + error.message);
+                }
+            };
+            reader.readAsText(arquivo);
+            event.target.value = '';
+        }
+
+        function filtrarTerritorios(filtro) {
+            filtroAtual = filtro;
+            
+            // Atualizar estilo dos botões
+            document.querySelectorAll('.btn-filtro').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-slate-900');
+                btn.classList.add('opacity-70');
+            });
+            
+            // Destacar botão ativo
+            event.target.classList.remove('opacity-70');
+            event.target.classList.add('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-slate-900');
+            
+            atualizarListaTerritorios();
+        }
+
+        function atualizarListaTerritorios() {
+            const container = document.getElementById('listaTerritorios');
+            
+            let territoriosFiltrados = territorios;
+            
+            if (filtroAtual !== 'todos') {
+                territoriosFiltrados = territorios.filter(t => t.status === filtroAtual);
+            }
+
+            if (territoriosFiltrados.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full card-neobrutal p-8 text-center">
+                        <div class="text-6xl mb-4">📍</div>
+                        <h3 class="text-xl font-bold text-white mb-2">Nenhum Território</h3>
+                        <p class="text-gray-400">Crie ou importe territórios para começar.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            territoriosFiltrados.forEach(t => {
+                const bloqueado = t.designacao?.bloqueado || false;
+                const checkboxDisabled = bloqueado ? 'disabled' : '';
+                const opacidade = bloqueado ? 'opacity-60' : '';
+                
+                html += `
+                    <div class="card-neobrutal p-6 transition-all ${opacidade}">
+                        <div class="flex gap-3 mb-3">
+                            <input type="checkbox" 
+                                   class="territorio-checkbox w-5 h-5 mt-1" 
+                                   data-territorio="${t.territorio_id}"
+                                   ${checkboxDisabled}
+                                   onclick="event.stopPropagation(); toggleTerritorioSelecionado('${t.territorio_id}')">
+                            <div class="flex-1 cursor-pointer" onclick="visualizarTerritorio('${t.territorio_id}')">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="text-lg font-bold text-white">${t.nome} ${bloqueado ? '🔒' : ''}</h3>
+                                    <span class="badge ${getBadgeClass(t.status)}">${getStatusText(t.status)}</span>
+                                </div>
+                                
+                                <div class="text-sm text-gray-400 mb-3">
+                                    <div>ID: ${t.territorio_id}</div>
+                                    <div>Unidade: ${t.unidades || 'Não definida'}</div>
+                            ${t.colaborador ? `<div>Colaborador: ${t.colaborador}</div>` : ''}
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs mb-3">
+                            <div>
+                                <div class="text-white font-bold">${t.estatisticas.total_residencias}</div>
+                                <div class="text-gray-400">Total</div>
+                            </div>
+                            <div>
+                                <div class="text-green-400 font-bold">${t.estatisticas.visitadas}</div>
+                                <div class="text-gray-400">Visitadas</div>
+                            </div>
+                            <div>
+                                <div class="text-yellow-400 font-bold">${t.estatisticas.pendentes}</div>
+                                <div class="text-gray-400">Pendentes</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-700 rounded-full h-2 mb-3">
+                            <div class="h-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-500" style="width: ${t.estatisticas.percentual_conclusao}%"></div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button onclick="event.stopPropagation(); copiarTerritorio('${t.territorio_id}')" class="btn-primary bg-purple-600 hover:bg-purple-700 text-white text-sm flex-1">
+                                📋 Copiar
+                            </button>
+                            <button onclick="event.stopPropagation(); editarTerritorio('${t.territorio_id}')" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm flex-1">
+                                ✏️ Editar
+                            </button>
+                            <button onclick="event.stopPropagation(); excluirTerritorio('${t.territorio_id}')" class="btn-primary bg-red-600 hover:bg-red-700 text-white text-sm flex-1">
+                                🗑️ Excluir
+                            </button>
+                        </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function exportarTerritorioIndividual(territorioId) {
+            const territorio = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorio) return;
+
+            const dataStr = JSON.stringify(territorio, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = `territorio_${territorio.territorio_id}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('✅ Território exportado!');
+        }
+
+        // === VISUALIZAR TERRITÓRIO ===
+        let territorioVisualizando = null;
+
+        function visualizarTerritorio(territorioId) {
+            const territorio = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorio) return;
+
+            territorioVisualizando = territorio;
+
+            // Preencher informações básicas
+            document.getElementById('vizNome').textContent = territorio.nome;
+            document.getElementById('vizID').textContent = territorio.territorio_id;
+            document.getElementById('vizUnidade').textContent = territorio.unidades || 'Não definida';
+            document.getElementById('vizColaborador').textContent = territorio.colaborador || 'Não designado';
+            document.getElementById('vizRegiao').textContent = territorio.residencias[0]?.regiao || '-';
+
+            // Status com badge
+            const statusBadge = `<span class="badge ${getBadgeClass(territorio.status)}">${getStatusText(territorio.status)}</span>`;
+            document.getElementById('vizStatus').innerHTML = statusBadge;
+
+            // Estatísticas
+            document.getElementById('vizTotal').textContent = territorio.estatisticas.total_residencias;
+            document.getElementById('vizVisitadas').textContent = territorio.estatisticas.visitadas;
+            document.getElementById('vizPendentes').textContent = territorio.estatisticas.pendentes;
+            document.getElementById('vizProgresso').textContent = territorio.estatisticas.percentual_conclusao.toFixed(0) + '%';
+
+            // Renderizar residências agrupadas por logradouro
+            const porLogradouro = {};
+            territorio.residencias.forEach(r => {
+                if (!porLogradouro[r.logradouro]) {
+                    porLogradouro[r.logradouro] = [];
+                }
+                porLogradouro[r.logradouro].push(r);
+            });
+
+            let htmlRes = '';
+            Object.keys(porLogradouro).forEach(logradouro => {
+                const residencias = porLogradouro[logradouro];
+                const visitadas = residencias.filter(r => r.visitado).length;
+                
+                htmlRes += `
+                    <div class="bg-slate-700/50 rounded-lg p-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <h5 class="text-white font-semibold">📍 ${logradouro}</h5>
+                            <span class="text-sm text-gray-400">${visitadas}/${residencias.length}</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2">
+                `;
+
+                residencias.forEach(r => {
+                    htmlRes += `
+                        <div class="text-xs p-2 rounded ${r.visitado ? 'bg-green-900/30 text-green-400' : 'bg-slate-800 text-gray-400'}">
+                            ${r.numero}${r.complemento ? '-' + r.complemento : ''}
+                        </div>
+                    `;
+                });
+
+                htmlRes += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('vizResidencias').innerHTML = htmlRes;
+
+            // Abrir modal
+            document.getElementById('modalVisualizarTerritorio').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // === DESIGNAÇÃO DE TERRITÓRIOS ===
+        let territoriosSelecionados = [];
+
+        function toggleTerritorioSelecionado(territorioId) {
+            const index = territoriosSelecionados.indexOf(territorioId);
+            if (index > -1) {
+                territoriosSelecionados.splice(index, 1);
+            } else {
+                territoriosSelecionados.push(territorioId);
+            }
+            atualizarBotaoDesignacao();
+        }
+
+        function atualizarBotaoDesignacao() {
+            const botao = document.getElementById('btnDesignarFlutuante');
+            const count = document.getElementById('countSelecionados');
+            
+            count.textContent = territoriosSelecionados.length;
+            
+            if (territoriosSelecionados.length > 0) {
+                botao.classList.remove('hidden');
+            } else {
+                botao.classList.add('hidden');
+            }
+        }
+
+        function abrirModalDesignacao() {
+            if (territoriosSelecionados.length === 0) {
+                alert('⚠️ Selecione pelo menos um território!');
+                return;
+            }
+
+            // Preencher lista de territórios selecionados
+            let html = '';
+            territoriosSelecionados.forEach(id => {
+                const t = territorios.find(terr => terr.territorio_id === id);
+                if (t) {
+                    html += `<div class="text-sm text-gray-300">• ${t.nome} (${t.territorio_id})</div>`;
+                }
+            });
+            document.getElementById('designListaTerritorios').innerHTML = html;
+            document.getElementById('designCountTerritorios').textContent = territoriosSelecionados.length;
+
+            // Preencher select de unidades
+            const select = document.getElementById('designUnidade');
+            select.innerHTML = '<option value="">Selecione uma unidade...</option>';
+            unidades.forEach(u => {
+                select.innerHTML += `<option value="${u.nome}">${u.nome}</option>`;
+            });
+
+            // Limpar campos
+            document.getElementById('designGestor').value = '';
+            document.getElementById('designDesignadoPor').value = '';
+
+            // Abrir modal
+            document.getElementById('modalDesignacao').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function confirmarDesignacao() {
+            const unidade = document.getElementById('designUnidade').value;
+            const gestor = document.getElementById('designGestor').value.trim();
+            const designadoPor = document.getElementById('designDesignadoPor').value.trim();
+
+            if (!unidade || !gestor || !designadoPor) {
+                alert('⚠️ Preencha todos os campos obrigatórios!');
+                return;
+            }
+
+            // Atualizar territórios selecionados
+            territoriosSelecionados.forEach(id => {
+                const index = territorios.findIndex(t => t.territorio_id === id);
+                if (index !== -1) {
+                    territorios[index].unidades = unidade;
+                    territorios[index].designacao = {
+                        unidade: unidade,
+                        gestor: gestor,
+                        designado_por: designadoPor,
+                        data_designacao: new Date().toISOString(),
+                        status: 'aguardando_retorno_gestor',
+                        bloqueado: true
+                    };
+                    territorios[index].status = 'aguardando_designacao';
+                }
+            });
+
+            salvarDados();
+            
+            // Limpar seleção
+            territoriosSelecionados = [];
+            document.querySelectorAll('.territorio-checkbox').forEach(cb => cb.checked = false);
+            atualizarBotaoDesignacao();
+
+            fecharModal('modalDesignacao');
+            atualizarTodasInterfaces();
+
+            alert(`✅ ${territoriosSelecionados.length + ' '}territórios designados com sucesso!\n\nUnidade: ${unidade}\nGestor: ${gestor}\nDesignado por: ${designadoPor}\n\n🔒 Territórios bloqueados até retorno do gestor.`);
+        }
+
+        function exportarTerritorioVisualizacao() {
+            if (!territorioVisualizando) return;
+            exportarTerritorioIndividual(territorioVisualizando.territorio_id);
+        }
+
+        function editarTerritorioVisualizacao() {
+            if (!territorioVisualizando) return;
+            fecharModal('modalVisualizarTerritorio');
+            editarTerritorio(territorioVisualizando.territorio_id);
+        }
+
+        function editarTerritorio(territorioId) {
+            const territorio = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorio) return;
+
+            // Preencher modal com dados do território
+            document.getElementById('novoTerrNome').value = territorio.nome;
+            document.getElementById('novoTerrID').value = territorio.territorio_id;
+            document.getElementById('novoTerrID').disabled = true; // ID não pode ser alterado
+            document.getElementById('novoTerrRegiao').value = territorio.residencias[0]?.regiao || '';
+            
+            // Preencher select de Unidade
+            const select = document.getElementById('novoTerrUnidade');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            unidades.forEach(u => {
+                const selected = u.nome === territorio.unidades ? 'selected' : '';
+                select.innerHTML += `<option value="${u.nome}" ${selected}>${u.nome}</option>`;
+            });
+
+            // Carregar residências existentes
+            residenciasNovas = [...territorio.residencias];
+            atualizarListaResidenciasNovas();
+
+            // Marcar como edição
+            document.getElementById('modalNovoTerritorio').dataset.editando = territorioId;
+            document.getElementById('modalNovoTerritorio').classList.remove('hidden');
+        }
+
+        function copiarTerritorio(territorioId) {
+            const territorio = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorio) return;
+
+            // Gerar novo ID sugerido
+            const novoIdSugerido = territorio.territorio_id + '_copia';
+            
+            // Preencher modal com dados copiados
+            document.getElementById('novoTerrNome').value = territorio.nome + ' (Cópia)';
+            document.getElementById('novoTerrID').value = novoIdSugerido;
+            document.getElementById('novoTerrID').disabled = false; // ID pode ser alterado
+            document.getElementById('novoTerrRegiao').value = territorio.residencias[0]?.regiao || '';
+            
+            // Preencher select de Unidade
+            const select = document.getElementById('novoTerrUnidade');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            unidades.forEach(u => {
+                const selected = u.nome === territorio.unidades ? 'selected' : '';
+                select.innerHTML += `<option value="${u.nome}" ${selected}>${u.nome}</option>`;
+            });
+
+            // Copiar residências (criar novos IDs)
+            residenciasNovas = territorio.residencias.map((r, index) => ({
+                ...r,
+                id: `res_${Date.now()}_${index}`,
+                visitado: false,  // Resetar status de visitado
+                data_visita: null,
+                nota: null
+            }));
+            atualizarListaResidenciasNovas();
+
+            // NÃO marcar como edição (é criação de novo)
+            delete document.getElementById('modalNovoTerritorio').dataset.editando;
+            document.getElementById('modalNovoTerritorio').classList.remove('hidden');
+            
+            alert('📋 Território copiado!\n\n✏️ Edite o ID e o nome conforme necessário.\n🏠 As residências foram copiadas (você pode alterá-las).');
+        }
+
+        function excluirTerritorio(territorioId) {
+            const territorio = territorios.find(t => t.territorio_id === territorioId);
+            if (!territorio) return;
+
+            if (confirm(`⚠️ Tem certeza que deseja excluir "${territorio.nome}"?`)) {
+                territorios = territorios.filter(t => t.territorio_id !== territorioId);
+                salvarDados();
+                atualizarTodasInterfaces();
+                alert('✅ Território excluído!');
+            }
+        }
+
+        // === Unidade ===
+        function abrirModalNovaUnidade() {
+            document.getElementById('novaUnidadeNome').value = '';
+            document.getElementById('novaUnidadeEndereco').value = '';
+            document.getElementById('novaUnidadeGestor').value = '';
+            document.getElementById('modalNovaUnidade').classList.remove('hidden');
+        }
+
+        function salvarNovaUnidade() {
+            const nome = document.getElementById('novaUnidadeNome').value.trim();
+            const modal = document.getElementById('modalNovaUnidade');
+            const editandoNome = modal.dataset.editando;
+            
+            if (!nome) {
+                alert('⚠️ Informe o nome da Unidade!');
+                return;
+            }
+
+            // Se está editando
+            if (editandoNome) {
+                const index = unidades.findIndex(u => u.nome === editandoNome);
+                if (index !== -1) {
+                    // Atualizar unidade
+                    unidades[index] = {
+                        nome: nome,
+                        endereco: document.getElementById('novaUnidadeEndereco').value.trim(),
+                        gestor: document.getElementById('novaUnidadeGestor').value.trim()
+                    };
+
+                    // Atualizar territórios que usam esta unidade
+                    territorios.forEach(t => {
+                        if (t.unidades === editandoNome) {
+                            t.unidades = nome;
+                        }
+                    });
+
+                    salvarDados();
+                    delete modal.dataset.editando;
+                    fecharModal('modalNovaUnidade');
+                    atualizarListaUnidades();
+                    atualizarTodasInterfaces();
+                    alert('✅ Unidade atualizada com sucesso!');
+                    return;
+                }
+            }
+
+            // Se está criando nova
+            if (unidades.find(u => u.nome === nome)) {
+                alert('⚠️ Já existe uma Unidade com este nome!');
+                return;
+            }
+
+            unidades.push({
+                nome: nome,
+                endereco: document.getElementById('novaUnidadeEndereco').value.trim(),
+                gestor: document.getElementById('novaUnidadeGestor').value.trim()
+            });
+
+            salvarDados();
+            fecharModal('modalNovaUnidade');
+            atualizarListaUnidades();
+            alert('✅ Unidade adicionada com sucesso!');
+        }
+
+        function editarUnidade(nomeUnidade) {
+            const unidade = unidades.find(u => u.nome === nomeUnidade);
+            if (!unidade) return;
+
+            // Preencher modal
+            document.getElementById('novaUnidadeNome').value = unidade.nome;
+            document.getElementById('novaUnidadeEndereco').value = unidade.endereco || '';
+            document.getElementById('novaUnidadeGestor').value = unidade.gestor || '';
+
+            // Marcar como edição
+            document.getElementById('modalNovaUnidade').dataset.editando = nomeUnidade;
+            document.getElementById('modalNovaUnidade').classList.remove('hidden');
+        }
+
+        function atualizarListaUnidades() {
+            const container = document.getElementById('listaUnidades');
+            
+            if (unidades.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <div class="text-4xl mb-2">🏢</div>
+                        Nenhuma Unidade cadastrada
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            unidades.forEach(u => {
+                const terrs = territorios.filter(t => t.unidades === u.nome);
+                html += `
+                    <div class="p-4 bg-slate-700/50 rounded-lg flex justify-between items-center">
+                        <div>
+                            <div class="text-white font-semibold">${u.nome}</div>
+                            ${u.endereco ? `<div class="text-sm text-gray-400">${u.endereco}</div>` : ''}
+                            ${u.gestor ? `<div class="text-sm text-gray-400">Gestor: ${u.gestor}</div>` : ''}
+                            <div class="text-xs text-gray-500 mt-1">${terrs.length} território(s)</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editarUnidade('${u.nome}')" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2">
+                                ✏️ Editar
+                            </button>
+                            <button onclick="excluirUnidade('${u.nome}')" class="btn-primary bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2">
+                                🗑️ Excluir
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function excluirUnidade(nome) {
+            const terrs = territorios.filter(t => t.unidades === nome);
+            if (terrs.length > 0) {
+                alert('⚠️ Não é possível excluir esta Unidade pois existem territórios vinculados a ela!');
+                return;
+            }
+
+            if (confirm(`⚠️ Tem certeza que deseja excluir "${nome}"?`)) {
+                unidades = unidades.filter(u => u.nome !== nome);
+                salvarDados();
+                atualizarListaUnidades();
+                alert('✅ Unidade excluída!');
+            }
+        }
+
+        // === RELATÓRIOS ===
+        function atualizarRelatorios() {
+            // Relatório por Unidade
+            const containerUnidades = document.getElementById('relatorioUnidades');
+            let htmlUnidades = '';
+            
+            unidades.forEach(u => {
+                const terrs = territorios.filter(t => t.unidades === u.nome);
+                const total = terrs.reduce((sum, t) => sum + t.estatisticas.total_residencias, 0);
+                const vis = terrs.reduce((sum, t) => sum + t.estatisticas.visitadas, 0);
+                const perc = total > 0 ? ((vis / total) * 100).toFixed(1) : 0;
+
+                htmlUnidades += `
+                    <div class="p-4 bg-slate-700/50 rounded-lg">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="text-white font-semibold">${u.nome}</div>
+                            <div class="text-cyan-400 font-bold">${perc}%</div>
+                        </div>
+                        <div class="text-sm text-gray-400">
+                            ${terrs.length} territórios • ${vis}/${total} residências
+                        </div>
+                    </div>
+                `;
+            });
+
+            containerUnidades.innerHTML = htmlUnidades || '<div class="text-center py-4 text-gray-400">Nenhuma Unidade cadastrada</div>';
+
+            // Relatório por Status
+            const containerStatus = document.getElementById('relatorioStatus');
+            const status = [
+                { key: 'aguardando_designacao', label: '⏳ Aguardando Designação', color: 'yellow' },
+                { key: 'em_andamento', label: '🔄 Em Andamento', color: 'blue' },
+                { key: 'concluido', label: '✅ Concluído', color: 'green' },
+                { key: 'parcialmente_concluido', label: '⚠️ Parcialmente Concluído', color: 'orange' }
+            ];
+
+            let htmlStatus = '';
+            status.forEach(s => {
+                const count = territorios.filter(t => t.status === s.key).length;
+                const perc = territorios.length > 0 ? ((count / territorios.length) * 100).toFixed(1) : 0;
+
+                htmlStatus += `
+                    <div class="p-4 bg-slate-700/50 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <div class="text-white font-semibold">${s.label}</div>
+                            <div>
+                                <span class="text-${s.color}-400 font-bold text-xl">${count}</span>
+                                <span class="text-gray-400 text-sm ml-2">(${perc}%)</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            containerStatus.innerHTML = htmlStatus;
+        }
+
+        function exportarTodosPendentes() {
+            const pendentes = territorios.filter(t => t.status === 'aguardando_designacao');
+            
+            if (pendentes.length === 0) {
+                alert('ℹ️ Não há territórios pendentes para exportar.');
+                return;
+            }
+
+            const dataStr = JSON.stringify(pendentes, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = `territorios_pendentes_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert(`✅ ${pendentes.length} território(s) pendente(s) exportado(s)!`);
+        }
+
+        function exportarTodosAndamento() {
+            const andamento = territorios.filter(t => t.status === 'em_andamento');
+            
+            if (andamento.length === 0) {
+                alert('ℹ️ Não há territórios em andamento para exportar.');
+                return;
+            }
+
+            const dataStr = JSON.stringify(andamento, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = `territorios_andamento_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert(`✅ ${andamento.length} território(s) em andamento exportado(s)!`);
+        }
+
+        function exportarRelatorioCompleto() {
+            const relatorio = {
+                data_geracao: new Date().toISOString(),
+                administrador: config.administrador,
+                regiao: config.regiao,
+                resumo: {
+                    total_unidades: unidades.length,
+                    total_territorios: territorios.length,
+                    total_residencias: territorios.reduce((sum, t) => sum + t.estatisticas.total_residencias, 0),
+                    total_visitadas: territorios.reduce((sum, t) => sum + t.estatisticas.visitadas, 0),
+                    percentual_geral: territorios.length > 0 ? 
+                        ((territorios.reduce((sum, t) => sum + t.estatisticas.visitadas, 0) / 
+                          territorios.reduce((sum, t) => sum + t.estatisticas.total_residencias, 0)) * 100).toFixed(2) : 0
+                },
+                unidades: unidades,
+                territorios: territorios
+            };
+
+            const dataStr = JSON.stringify(relatorio, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = `relatorio_completo_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('✅ Relatório completo exportado!');
+        }
+
+        // === CONFIGURAÇÕES ===
+        function abrirModalConfiguracoes() {
+            document.getElementById('configAdministrador').value = config.administrador || '';
+            document.getElementById('configRegiao').value = config.regiao || '';
+            document.getElementById('modalConfiguracoes').classList.remove('hidden');
+        }
+
+        function salvarConfiguracoes() {
+            config.administrador = document.getElementById('configAdministrador').value.trim();
+            config.regiao = document.getElementById('configRegiao').value.trim();
+            
+            salvarDados();
+            fecharModal('modalConfiguracoes');
+            alert('✅ Configurações salvas!');
+        }
+
+        // === BACKUP E RESTAURAÇÃO ===
+        function fazerBackupCompleto() {
+            const backup = {
+                data_backup: new Date().toISOString(),
+                versao: '1.0',
+                territorios: territorios,
+                unidades: unidades,
+                config: config
+            };
+
+            const dataStr = JSON.stringify(backup, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const dataAtual = new Date().toISOString().split('T')[0];
+            link.href = url;
+            link.download = `sisvisita_backup_completo_${dataAtual}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('✅ Backup completo realizado com sucesso!');
+        }
+
+        function fazerBackupCadastros() {
+            const backup = {
+                data_backup: new Date().toISOString(),
+                versao: '1.0',
+                tipo: 'cadastros',
+                territorios: territorios,
+                unidades: unidades
+            };
+
+            const dataStr = JSON.stringify(backup, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const dataAtual = new Date().toISOString().split('T')[0];
+            link.href = url;
+            link.download = `sisvisita_backup_cadastros_${dataAtual}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('✅ Backup de cadastros realizado com sucesso!');
+        }
+
+        function restaurarBackup(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            if (!confirm('⚠️ ATENÇÃO!\n\nRestaurar backup irá SUBSTITUIR todos os dados atuais.\n\nDeseja continuar?')) {
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    if (!backup.versao || !backup.data_backup) {
+                        alert('❌ Arquivo de backup inválido!');
+                        return;
+                    }
+
+                    // Restaurar dados
+                    if (backup.territorios) territorios = backup.territorios;
+                    if (backup.unidades) unidades = backup.unidades;
+                    if (backup.config) config = backup.config;
+
+                    salvarDados();
+                    atualizarTodasInterfaces();
+                    
+                    alert(`✅ Backup restaurado com sucesso!\n\nData do backup: ${new Date(backup.data_backup).toLocaleString('pt-BR')}`);
+                } catch (error) {
+                    alert('❌ Erro ao restaurar backup: ' + error.message);
+                }
+            };
+            reader.readAsText(arquivo);
+            event.target.value = '';
+        }
+
+        function limparTodosDados() {
+            if (confirm('⚠️ ATENÇÃO! Esta ação irá excluir TODOS os dados.\n\nDeseja continuar?')) {
+                if (confirm('⚠️ Tem CERTEZA ABSOLUTA? Esta ação não pode ser desfeita!')) {
+                    localStorage.removeItem('sisVisita_super_territorios');
+                    localStorage.removeItem('sisVisita_super_unidades');
+                    localStorage.removeItem('sisVisita_super_config');
+                    
+                    territorios = [];
+                    unidades = [];
+                    config = { administrador: '', regiao: '' };
+                    
+                    fecharModal('modalConfiguracoes');
+                    atualizarTodasInterfaces();
+                    alert('✅ Todos os dados foram excluídos!');
+                }
+            }
+        }
+
+        // === UTILIDADES ===
+        function getBadgeClass(status) {
+            const classes = {
+                'aguardando_designacao': 'badge-aguardando',
+                'em_andamento': 'badge-andamento',
+                'concluido': 'badge-concluido',
+                'parcialmente_concluido': 'badge-parcial'
+            };
+            return classes[status] || 'badge-aguardando';
+        }
+
+        function getStatusText(status) {
+            const textos = {
+                'aguardando_designacao': '⏳ Aguardando',
+                'em_andamento': '🔄 Andamento',
+                'concluido': '✅ Concluído',
+                'parcialmente_concluido': '⚠️ Parcial'
+            };
+            return textos[status] || status;
+        }
+
+        function fecharModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+
+        // ===== INICIALIZAÇÃO =====
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDados();
+            atualizarTodasInterfaces();
+            lucide.createIcons();
+        });
+
+    </script>
+
+    <!-- Modal: Designar Territórios -->
+    <div id="modalDesignacao" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalDesignacao')">
+        <div class="card-neobrutal w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <h3 class="text-2xl font-bold text-white mb-4">📌 Designar Territórios</h3>
+            
+            <div class="space-y-4">
+                <!-- Lista de Territórios Selecionados -->
+                <div class="bg-slate-700/50 rounded-lg p-4">
+                    <h4 class="font-semibold text-white mb-2">Territórios Selecionados (<span id="designCountTerritorios">0</span>):</h4>
+                    <div id="designListaTerritorios" class="space-y-1 max-h-48 overflow-y-auto">
+                        <!-- Lista será preenchida -->
+                    </div>
+                </div>
+
+                <!-- Unidade -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Unidade *</label>
+                    <select id="designUnidade" class="input-neobrutal">
+                        <option value="">Selecione uma unidade...</option>
+                    </select>
+                </div>
+
+                <!-- Gestor -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Gestor da Unidade *</label>
+                    <input type="text" id="designGestor" class="input-neobrutal" placeholder="Nome do gestor">
+                </div>
+
+                <!-- Designado Por -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Designado por (quem está distribuindo) *</label>
+                    <input type="text" id="designDesignadoPor" class="input-neobrutal" placeholder="Nome de quem está designando">
+                </div>
+
+                <!-- Aviso -->
+                <div class="p-4 bg-orange-900/20 border border-orange-600 rounded-lg">
+                    <p class="text-sm text-gray-300">
+                        ⚠️ <strong>Atenção:</strong> Os territórios selecionados ficarão <strong>bloqueados</strong> até que o gestor retorne com a informação de quem ficou com cada território.
+                    </p>
+                </div>
+
+                <!-- Botões -->
+                <div class="flex gap-3">
+                    <button onclick="confirmarDesignacao()" class="btn-primary bg-green-600 hover:bg-green-700 text-white flex-1">
+                        <i data-lucide="check" class="w-5 h-5 mr-2"></i>
+                        Confirmar Designação
+                    </button>
+                    <button onclick="fecharModal('modalDesignacao')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Visualizar Território -->
+    <div id="modalVisualizarTerritorio" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalVisualizarTerritorio')">
+        <div class="card-neobrutal w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <h3 class="text-2xl font-bold text-white mb-4">👁️ Visualizar Território</h3>
+            
+            <div class="space-y-4">
+                <!-- Informações Básicas -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm text-gray-400">Nome</label>
+                        <div class="text-white font-semibold" id="vizNome">-</div>
+                    </div>
+                    <div>
+                        <label class="text-sm text-gray-400">ID</label>
+                        <div class="text-white font-semibold" id="vizID">-</div>
+                    </div>
+                    <div>
+                        <label class="text-sm text-gray-400">Unidade</label>
+                        <div class="text-white font-semibold" id="vizUnidade">-</div>
+                    </div>
+                    <div>
+                        <label class="text-sm text-gray-400">Status</label>
+                        <div id="vizStatus">-</div>
+                    </div>
+                    <div>
+                        <label class="text-sm text-gray-400">Colaborador</label>
+                        <div class="text-white font-semibold" id="vizColaborador">-</div>
+                    </div>
+                    <div>
+                        <label class="text-sm text-gray-400">Região</label>
+                        <div class="text-white font-semibold" id="vizRegiao">-</div>
+                    </div>
+                </div>
+
+                <!-- Estatísticas -->
+                <div class="grid grid-cols-4 gap-3">
+                    <div class="p-3 bg-slate-700/50 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-blue-400" id="vizTotal">0</div>
+                        <div class="text-xs text-gray-400">Total</div>
+                    </div>
+                    <div class="p-3 bg-slate-700/50 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-green-400" id="vizVisitadas">0</div>
+                        <div class="text-xs text-gray-400">Visitadas</div>
+                    </div>
+                    <div class="p-3 bg-slate-700/50 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-yellow-400" id="vizPendentes">0</div>
+                        <div class="text-xs text-gray-400">Pendentes</div>
+                    </div>
+                    <div class="p-3 bg-slate-700/50 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-purple-400" id="vizProgresso">0%</div>
+                        <div class="text-xs text-gray-400">Progresso</div>
+                    </div>
+                </div>
+
+                <!-- Lista de Residências -->
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-2">📍 Residências</h4>
+                    <div id="vizResidencias" class="max-h-64 overflow-y-auto space-y-2">
+                        <!-- Residências serão inseridas aqui -->
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="flex gap-3">
+                    <button onclick="exportarTerritorioVisualizacao()" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white flex-1">
+                        <i data-lucide="download" class="w-5 h-5 mr-2"></i>
+                        Download
+                    </button>
+                    <button onclick="editarTerritorioVisualizacao()" class="btn-primary bg-purple-600 hover:bg-purple-700 text-white flex-1">
+                        <i data-lucide="edit" class="w-5 h-5 mr-2"></i>
+                        Editar
+                    </button>
+                    <button onclick="fecharModal('modalVisualizarTerritorio')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Lançamento Manual -->
+    <div id="modalLancamentoManual" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="fecharModal('modalLancamentoManual')">
+        <div class="card-neobrutal w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <h3 class="text-2xl font-bold text-white mb-4">✏️ Lançamento Manual de Execução</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Território *</label>
+                    <select id="lancamentoTerritorio" class="input-neobrutal" onchange="carregarTerritorioLancamento()">
+                        <option value="">Selecione um território...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Executor *</label>
+                    <input type="text" id="lancamentoExecutor" class="input-neobrutal" placeholder="Ex: José Carlos">
+                </div>
+
+                <div class="p-4 bg-blue-900/20 border border-blue-600 rounded-lg">
+                    <p class="text-sm text-gray-300">
+                        💡 <strong>Dica:</strong> Use esta função quando um executor trabalhou sem o aplicativo (papel e caneta) e você precisa registrar manualmente o que foi visitado.
+                    </p>
+                </div>
+
+                <div id="lancamentoResidencias" class="max-h-96 overflow-y-auto">
+                    <!-- Residências serão inseridas aqui -->
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="salvarLancamentoManual()" class="btn-primary bg-green-600 hover:bg-green-700 text-white flex-1">
+                        <i data-lucide="save" class="w-5 h-5 mr-2"></i>
+                        Salvar Lançamento
+                    </button>
+                    <button onclick="fecharModal('modalLancamentoManual')" class="btn-primary bg-slate-700 hover:bg-slate-600 text-white flex-1">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
